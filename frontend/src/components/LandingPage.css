@@ -1,0 +1,25 @@
+.landing-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
+.landing-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.landing-container p {
+  margin-bottom: 2rem;
+}
+
+.landing-container button {
+  margin: 10px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  cursor: pointer;
+}

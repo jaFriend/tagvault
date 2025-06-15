@@ -1,0 +1,263 @@
+:root {
+  --color-dark-blue-gray: #333446;
+  --color-medium-grayish-blue: #ffffff;
+  --color-light-grayish-blue: #B8CFCE;
+  --color-lightest-gray: #EAEFEF;
+  --color-accent-blue: #007bff;
+  --color-danger-red: #dc3545;
+  --color-success-green: #28a745;
+}
+
+.artifactCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 380px;
+  min-width: 380px;
+  flex-basis: calc(33% - 20px);
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardActions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background-color: #f0f0f0;
+}
+
+.removeButton {
+  position: static;
+  color: #a0a0a0;
+  border-color: #a0a0a0;
+  padding: 6px 12px;
+  font-size: 0.9em;
+}
+
+.removeButton:hover {
+  color: #ff4d4d;
+  background-color: #ffeaea;
+}
+
+.editButton {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+
+
+.editButton:hover {
+  background-color: #e6f2ff;
+}
+
+.artifactHeader {
+  margin-bottom: 1rem;
+  padding-right: 3rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark-blue-gray);
+  word-wrap: break-word;
+}
+
+.editTitleInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-light-grayish-blue);
+  background-color: var(--color-lightest-gray);
+  color: var(--color-dark-blue-gray);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
+}
+
+.fileInfo {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.filename,
+.fileSize {
+  font-size: 1em;
+  margin-bottom: 0.25rem;
+  color: var(--color-dark-blue-gray);
+}
+
+.fileEditSection {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px dashed var(--color-light-grayish-blue);
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.fileInputLabel {
+  display: block;
+  font-size: 0.9em;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark-blue-gray);
+}
+
+.fileInputReplace {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-light-grayish-blue);
+  background-color: var(--color-lightest-gray);
+  color: var(--color-dark-blue-gray);
+  font-size: 1em;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.newFileInfo,
+.currentFileInfo {
+  font-size: 0.85em;
+  margin-top: 0.75rem;
+  color: var(--color-dark-blue-gray);
+}
+
+
+.editButtonsBottom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.saveButton {
+  background-color: var(--color-success-green);
+  color: var(--color-lightest-gray);
+  border-color: var(--color-success-green);
+}
+
+.saveButton:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.cancelButton {
+  background-color: var(--color-light-grayish-blue);
+  color: var(--color-dark-blue-gray);
+  border-color: var(--color-light-grayish-blue);
+}
+
+.cancelButton:hover {
+  background-color: #a7c0bd;
+  border-color: #9bb7b5;
+}
+
+
+.tagsSeparator {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark-blue-gray);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 1rem;
+}
+
+
+.tagsContainer {
+  display: flex;
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding-bottom: 5px;
+  margin-top: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.addTagButton {
+  background-color: #888;
+  color: white;
+  border: none;
+  padding: 0.3em 0.8em;
+  border-radius: 0.375rem;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  margin-top: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 5px;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+
+.addTagButton:hover {
+  background-color: var(--color-dark-blue-gray);
+  color: var(--color-lightest-gray);
+}
+
+
+@media (max-width: 600px) {
+  .artifactCard {
+    padding: 1rem;
+  }
+
+  .cardActions {
+    top: 0.75rem;
+    right: 0.75rem;
+    gap: 0.3rem;
+  }
+
+  .actionButton {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .removeButton {
+    font-size: 1rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .editTitleInput {
+    font-size: 1.3rem;
+  }
+
+  .fileInfo p {
+    font-size: 0.9em;
+  }
+
+  .tagsSeparator {
+    font-size: 0.85em;
+  }
+}

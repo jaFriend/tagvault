@@ -1,0 +1,256 @@
+:root {
+  --color-dark-blue-gray: #333446;
+  --color-medium-grayish-blue: #7F8CAA;
+  --color-light-grayish-blue: #B8CFCE;
+  --color-lightest-gray: #EAEFEF;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 1rem;
+}
+
+.modalContent {
+  position: relative;
+  background-color: var(--color-medium-grayish-blue);
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem;
+  max-width: 32rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeInScale 0.3s ease-out forwards;
+}
+
+/* Close Button Styles */
+.modalCloseButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-lightest-gray);
+  padding: 0.25rem;
+  border-radius: 9999px;
+  outline: none;
+  transition: color 0.2s ease-in-out;
+  /* Added transition for hover */
+}
+
+.modalCloseButton:hover {
+  color: #fff;
+  /* White on hover for close button */
+}
+
+/* Modal Title Bar Styles */
+.modalTitleBar {
+  text-align: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-top: -1.5rem;
+  background-color: var(--color-dark-blue-gray);
+  color: var(--color-lightest-gray);
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  /* Ensure no default margin from h2 */
+}
+
+/* Input Group Styles */
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--color-dark-blue-gray);
+}
+
+.textInputField,
+.fileInputField {
+  /* Combined for common styles */
+  width: 95%;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  background-color: var(--color-lightest-gray);
+  color: var(--color-dark-blue-gray);
+  border: 1px solid var(--color-light-grayish-blue);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.textInputField::placeholder,
+.fileInputField::placeholder {
+  /* Placeholder style */
+  color: #7b8a9c;
+}
+
+.textInputField:focus,
+.fileInputField:focus {
+  border-color: var(--color-dark-blue-gray);
+  box-shadow: 0 0 0 2px var(--color-dark-blue-gray);
+}
+
+.textAreaField {
+  resize: vertical;
+}
+
+/* Upload Button Container Styles */
+.uploadButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  /* Added margin for separation */
+}
+
+/* Upload Button Styles */
+.uploadButton {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s;
+  border: none;
+  cursor: pointer;
+  background-color: var(--color-dark-blue-gray);
+  color: var(--color-lightest-gray);
+  outline: none;
+}
+
+.uploadButton:hover {
+  background-color: #222333;
+}
+
+.uploadButton:focus {
+  box-shadow: 0 0 0 2px var(--color-light-grayish-blue);
+}
+
+.uploadButton:disabled {
+  background-color: #ccc;
+  /* Lighter gray when disabled */
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* NEW STYLES FOR TABS */
+.tabNavigation {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  /* Space below tabs */
+  border-bottom: 1px solid var(--color-dark-blue-gray);
+  /* Underline for tabs */
+  padding-bottom: 5px;
+  /* Space between tabs and line */
+}
+
+.tabButton {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 1em;
+  color: var(--color-dark-blue-gray);
+  /* Default tab text color */
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease-in-out;
+  border-radius: 0.375rem 0.375rem 0 0;
+  /* Rounded top corners */
+  margin: 0 0.25rem;
+  /* Small space between buttons */
+}
+
+.tabButton:hover {
+  color: var(--color-lightest-gray);
+  /* Lightest gray on hover */
+  background-color: var(--color-dark-blue-gray);
+  /* Dark background on hover */
+}
+
+.tabButton.active {
+  color: var(--color-lightest-gray);
+  /* Lightest gray for active tab */
+  font-weight: bold;
+  background-color: var(--color-dark-blue-gray);
+  /* Dark background for active tab */
+}
+
+/* This is the line that appears under the active tab */
+.tabButton.active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  /* Adjust to sit below the border */
+  left: 0;
+  width: 100%;
+  height: 3px;
+  /* Underline thickness */
+  background-color: var(--color-lightest-gray);
+  /* Underline color */
+  border-radius: 2px;
+}
+
+.tabContent {
+  padding-top: 1rem;
+  /* Space between tabs and content */
+}
+
+.selectedFileInfo {
+  margin-top: 0.5rem;
+  font-size: 0.8em;
+  color: var(--color-dark-blue-gray);
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .modalTitle {
+    font-size: 1.1em;
+  }
+
+  .tabButton {
+    font-size: 0.9em;
+    padding: 0.6rem 1rem;
+  }
+}

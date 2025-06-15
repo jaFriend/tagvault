@@ -1,0 +1,261 @@
+.artifactCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 380px;
+  min-width: 380px;
+  flex-basis: calc(33% - 20px);
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.artifactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0px;
+}
+
+.title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  margin: 0px;
+  margin-right: 16px;
+  margin-top: 20px;
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.content {
+  font-size: 1em;
+  line-height: 1.5;
+  color: #555;
+  margin-bottom: 12px;
+  flex-grow: 1;
+  white-space: pre-wrap;
+}
+
+.removeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 1.2em;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.removeButton:hover {
+  background-color: #f0f0f0;
+  color: #c00;
+}
+
+.tagsSeparator {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark-blue-gray);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 1rem;
+}
+
+.tagsContainer {
+  display: flex;
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding-bottom: 5px;
+  margin-top: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.tagsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  padding: 5px 10px;
+  margin-right: 8px;
+  font-size: 0.9em;
+  color: #333;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.removeTagButton {
+  background: none;
+  border: none;
+  color: #888;
+  margin-left: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 3px;
+  font-size: 1em;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.removeTagButton:hover {
+  background-color: #d0d0d0;
+  color: #c00;
+}
+
+.addTagButton {
+  background-color: #888;
+  color: white;
+  border: none;
+  padding: 0.3em 0.8em;
+  border-radius: 0.375rem;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  margin-top: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 5px;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+.addTagButton:hover {
+  background-color: #555;
+}
+
+.newTagInput {
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  outline: none;
+  flex-shrink: 0;
+  width: 100px;
+  margin-left: 5px;
+}
+
+.cardActions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.actionButton {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background-color: #f0f0f0;
+}
+
+.editButton {
+  color: #007bff;
+  border-color: #007bff;
+}
+
+.editButton:hover {
+  background-color: #e6f2ff;
+}
+
+.removeButton {
+  position: static;
+  color: #a0a0a0;
+  border-color: #a0a0a0;
+  padding: 6px 12px;
+  font-size: 0.9em;
+}
+
+.removeButton:hover {
+  color: #ff4d4d;
+  background-color: #ffeaea;
+}
+
+.editTitleInput,
+.editContentTextarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-light-grayish-blue);
+  background-color: var(--color-lightest-gray);
+  color: var(--color-dark-blue-gray);
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
+}
+
+.editTitleInput {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.editContentTextarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.editButtonsBottom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+
+.editButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+.saveButton {
+  background-color: var(--color-success-green);
+  color: var(--color-lightest-gray);
+  border-color: var(--color-success-green);
+}
+
+.saveButton:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.cancelButton {
+  background-color: var(--color-light-grayish-blue);
+  color: var(--color-dark-blue-gray);
+  border-color: var(--color-light-grayish-blue);
+}
+
+.cancelButton:hover {
+  background-color: #a7c0bd;
+  border-color: #9bb7b5;
+}

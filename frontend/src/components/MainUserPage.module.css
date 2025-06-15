@@ -1,0 +1,54 @@
+.mainContainer {
+  text-align: center;
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.artifactGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+
+.uploadButton {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #333446;
+  color: #EAEFEF;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.uploadButton:hover {
+  background-color: #44455a;
+}
+
+.errorMessage {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-top: 10px;
+}
