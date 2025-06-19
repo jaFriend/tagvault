@@ -48,7 +48,6 @@ async function getArtifacts(userId, searchValue, tags) {
       }));
   }
 
-  console.log(JSON.stringify(whereMethod))
 
   return prisma.artifact.findMany({
     where: whereMethod,

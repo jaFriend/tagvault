@@ -21,8 +21,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
         text: textBodyInput
       }
     });
-    setTextTitleInput('');
-    setTextBodyInput('');
+    clearForms();
     onClose();
   };
 
@@ -39,8 +38,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
         file: selectedFile
       }
     });
-    setFileTitleInput('');
-    setSelectedFile(null);
+    clearForms();
     onClose();
   };
 
@@ -57,7 +55,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
 
   // Override onClose to also clear forms
   const handleClose = () => {
-    clearForms();
     onClose();
   };
 
@@ -81,7 +78,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
             className={`${styles.tabButton} ${activeTab === 'TEXT' ? styles.active : ''}`}
             onClick={() => {
               setActiveTab('TEXT');
-              clearForms();
             }}
           >
             Text/Code
@@ -90,7 +86,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
             className={`${styles.tabButton} ${activeTab === 'FILE' ? styles.active : ''}`}
             onClick={() => {
               setActiveTab('FILE');
-              clearForms();
             }}
           >
             File

@@ -5,7 +5,6 @@ node_modules/
 yarn-error.log
 .expo/
 **.env
-package-lock.json
 .yarn/cache/
 .yarn/install-state.gz
 .env.*
