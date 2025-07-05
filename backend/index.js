@@ -3,13 +3,15 @@ import cors from 'cors';
 
 const app = express();
 const PORT = 5050;
-
+const permitted_origin = process.env.PERMITTED_ORIGIN
 import users from './routes/api/users.js';
 import artifacts from './routes/api/artifacts.js';
 import tags from './routes/api/tags.js';
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: permitted_origin
+}));
 
 app.use('/api/users', users);
 app.use('/api/artifacts', artifacts);

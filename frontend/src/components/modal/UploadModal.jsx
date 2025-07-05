@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './UploadModal.module.css';
 
 const UploadModal = ({ isOpen, onClose, onUpload }) => {
@@ -53,7 +53,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
     setSelectedFile(null);
   };
 
-  // Override onClose to also clear forms
   const handleClose = () => {
     onClose();
   };
@@ -114,7 +113,15 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
               <textarea
                 id="text-body-input"
                 value={textBodyInput}
-                onChange={(e) => setTextBodyInput(e.target.value)}
+                onChange={(e) => {
+                  setTextBodyInput(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                  }
+
+                }}
                 placeholder="Enter your text here..."
                 rows="8"
                 className={`${styles.textInputField} ${styles.textAreaField}`}

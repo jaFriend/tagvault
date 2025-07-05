@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
 import { SignInButton, SignUpButton } from '@clerk/clerk-react';
 
-export default function NavBar() {
+const NavBar = () => {
   const navigate = useNavigate();
 
   return (
@@ -24,3 +24,5 @@ export default function NavBar() {
     </nav>
   );
 }
+
+export default NavBar;

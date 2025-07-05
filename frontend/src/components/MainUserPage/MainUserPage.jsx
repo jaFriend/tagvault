@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styles from './MainUserPage.module.css';
 import { useUser } from '@clerk/clerk-react'
-import SearchInput from './SearchInput';
-import UploadModal from './modal/UploadModal';
-import TagUploadModal from './modal/TagUploadModal';
-import NavBar from './NavBar';
-import TagItem from './TagItem'
-import ArtifactList from './ArtifactList';
-import useArtifacts from '../hooks/useArtifacts';
-import useTags from '../hooks/useTags';
+import SearchInput from '../SearchInput';
+import UploadModal from '../modal/UploadModal';
+import TagUploadModal from '../modal/TagUploadModal';
+import TagItem from '../TagItem'
+import ArtifactList from '../ArtifactList';
+import useArtifacts from '../../hooks/useArtifacts';
+import useTags from '../../hooks/useTags';
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 const MainUserPage = () => {
-
   const { user } = useUser();
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const handleFileModalOpen = () => { setIsFileModalOpen(true); };
@@ -20,17 +18,21 @@ const MainUserPage = () => {
   const [searchValue, setSearchValue] = useState('');
   const [tagList, setTagList] = useState([]);
 
-  const { artifacts, isLoadingArtifacts, artifactError, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, SERVER_URL, searchValue, tagList);
-  const { tags, isLoadingTags, tagError, addTag, removeTag, fetchTagsData } = useTags(user.id, SERVER_URL);
+  const { artifacts, isLoadingArtifacts, artifactError,
+    addArtifact, removeArtifact, onRemoveTag,
+    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, SERVER_URL, searchValue, tagList);
+  const { tags, isLoadingTags, tagError,
+    addTag, removeTag, fetchTagsData } = useTags(user.id, SERVER_URL);
 
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
 
-  const fetchTagsDataOnAddTag = async (artifactId, tagName) => {
+  const fetchTagsDataOnAddTag = useCallback(async (artifactId, tagName) => {
     await onAddTag(artifactId, tagName);
     fetchTagsData();
-  };
+  }, [onAddTag, fetchTagsData]);
+
   const fetchTagsDataOnRemoveTag = async (artifactId, tagId) => {
     await onRemoveTag(artifactId, tagId);
     fetchTagsData();
@@ -57,10 +59,8 @@ const MainUserPage = () => {
     });
   };
 
-
   return (
     <div className={styles.mainContainer}>
-      <NavBar />
       <h1>Welcome to your TagVault Dashboard!</h1>
       <SearchInput onSearchSubmit={searchSubmit} />
       <button

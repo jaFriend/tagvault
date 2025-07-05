@@ -10,6 +10,7 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedContent, setEditedContent] = useState(content);
+
   useEffect(() => {
     if (tagsScrollContainerRef.current && showAddTagInput) {
       tagsScrollContainerRef.current.scrollLeft = tagsScrollContainerRef.current.scrollWidth;
@@ -64,24 +65,7 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
 
   return (
     <div className={styles.artifactCard}>
-      <div className={styles.cardActions}>
-        {!isEditing && (
-          <button
-            className={`${styles.actionButton} ${styles.editButton}`}
-            onClick={handleEditClick}
-            aria-label="Edit artifact"
-          >
-            Edit
-          </button>
-        )}
-        {onRemove && (
-          <button className={`${styles.actionButton} ${styles.removeButton}`} onClick={onRemove} aria-label="Remove artifact">
-            &times;
-          </button>
-        )}
-      </div>
-
-      <div className={styles.artifactHeader}>
+      <div className={styles.headerRow}>
         {isEditing ? (
           <input
             type="text"
@@ -96,9 +80,28 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
             <h3 className={styles.title}>{title}</h3>
           )
         )}
-      </div>
 
-      {isEditing ? (
+        <div className={styles.cardActions}>
+          {!isEditing && (
+            <button
+              className={`${styles.actionButton} ${styles.editButton}`}
+              onClick={handleEditClick}
+              aria-label="Edit artifact"
+            >
+              Edit
+            </button>
+          )}
+          {onRemove && (
+            <button
+              className={`${styles.actionButton} ${styles.removeButton}`}
+              onClick={onRemove}
+              aria-label="Remove artifact"
+            >
+              &times;
+            </button>
+          )}
+        </div>
+      </div>      {isEditing ? (
         <textarea
           className={styles.editContentTextarea}
           value={editedContent}
@@ -107,7 +110,9 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
           aria-label="Edit artifact content"
         />
       ) : (
-        <p className={styles.content}>{content}</p>
+        <div className={styles.scrollableContentWrapper}>
+          <p className={styles.content}>{content}</p>
+        </div>
       )}
 
       {isEditing && (
@@ -117,34 +122,33 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
         </div>
       )}
 
-      <div className={styles.tagsSeparator}>
-        Tags:
-      </div>
-
-      <div className={styles.tagsContainer} ref={tagsScrollContainerRef}>
-        {tags.map((tag) => (
-          <TagItem key={tag.id} name={tag.name} onRemove={() => onRemoveTag(artifactId, tag.id)} />
-        ))}
-        {!showAddTagInput ? (
-          <button
-            className={styles.addTagButton}
-            onClick={() => setShowAddTagInput(true)}
-            aria-label="Add new tag"
-          >
-            +
-          </button>
-        ) : (
-          <input
-            type="text"
-            className={styles.newTagInput}
-            value={newTagValue}
-            onChange={(e) => setNewTagValue(e.target.value)}
-            onKeyPress={handleInputKeyPress}
-            onBlur={handleInputBlur}
-            placeholder="New tag..."
-            autoFocus
-          />
-        )}
+      <div className={styles.tagsSection}>
+        <div className={styles.tagsSeparator}>Tags:</div>
+        <div className={styles.tagsContainer} ref={tagsScrollContainerRef}>
+          {tags.map((tag) => (
+            <TagItem key={tag.id} name={tag.name} onRemove={() => onRemoveTag(artifactId, tag.id)} />
+          ))}
+          {!showAddTagInput ? (
+            <button
+              className={styles.addTagButton}
+              onClick={() => setShowAddTagInput(true)}
+              aria-label="Add new tag"
+            >
+              +
+            </button>
+          ) : (
+            <input
+              type="text"
+              className={styles.newTagInput}
+              value={newTagValue}
+              onChange={(e) => setNewTagValue(e.target.value)}
+              onKeyPress={handleInputKeyPress}
+              onBlur={handleInputBlur}
+              placeholder="New tag..."
+              autoFocus
+            />
+          )}
+        </div>
       </div>
     </div>
   );

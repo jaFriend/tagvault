@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import styles from './ArtifactFileItem.module.css';
 import TagItem from '../TagItem';
 
-
 const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tags, onAddTag, onRemoveTag, onEditArtifact }) => {
   const [showAddTagInput, setShowAddTagInput] = useState(false);
   const [newTagValue, setNewTagValue] = useState('');

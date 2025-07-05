@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useToken from './useToken.jsx';
 
 const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
@@ -46,6 +46,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   useEffect(() => {
     fetchArtifactsData();
   }, [fetchArtifactsData]);
+
 
 
   const onRemoveTag = async (artifactId, tagId) => {
@@ -160,6 +161,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
       },
       body: JSON.stringify({
         "title": title,
+        "data": data,
         "fileType": "FILE"
       })
     })
@@ -238,6 +240,39 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
           )
         ));
   }
+  const cooldownRef = useRef(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      const screenHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const currentHeight = window.scrollY + screenHeight;
+
+      if (documentHeight > screenHeight) {
+        if (currentHeight >= documentHeight * 0.75 && !cooldownRef.current) {
+          console.log("Add more");
+          cooldownRef.current = true;
+
+          setTimeout(() => {
+            cooldownRef.current = false;
+          }, 500)
+        }
+        if (currentHeight >= documentHeight) {
+          console.log("You're at the bottom of the page.");
+        }
+      }
+    }
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (cooldownRef.current) {
+        clearTimeout(cooldownRef.current);
+        cooldownRef.current = null;
+      }
+    };
+  }, []);
 
   return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact };
 };
