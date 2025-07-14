@@ -20,7 +20,7 @@ async function createTextArtifact(id, title, textContent) {
   return createArtifact(id, title, textContent, null, null, null, "TEXT", false);
 }
 
-async function getArtifacts(userId, searchValue, tags) {
+async function getArtifacts(userId, searchValue, tags, limit, cursor) {
   const whereMethod = { userId: userId };
 
   if (searchValue !== '') {
@@ -48,16 +48,22 @@ async function getArtifacts(userId, searchValue, tags) {
       }));
   }
 
-
-  return prisma.artifact.findMany({
+  const queryConfig = {
     where: whereMethod,
+    take: limit + 1,
     include: {
       tags: true
     },
     orderBy: {
       createdAt: 'desc'
     }
-  })
+  };
+
+  if (cursor) {
+    queryConfig.cursor = { id: cursor };
+    queryConfig.skip = 1;
+  }
+  return prisma.artifact.findMany(queryConfig);
 }
 
 

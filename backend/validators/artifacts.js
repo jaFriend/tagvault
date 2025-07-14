@@ -51,6 +51,13 @@ const getArtifactsValidator = [
         'tags must be an empty string ("") or an array of strings'
       );
     }),
+  query('limit')
+    .exists().withMessage("Limit is Required")
+    .isInt({ min: 1 }).withMessage("Limit must be a number.")
+    .toInt(),
+  query('cursor')
+    .optional()
+    .isString().withMessage("Cursor needs to be in string")
 ];
 
 

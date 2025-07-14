@@ -5,49 +5,90 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   const [artifacts, setArtifacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasMoreArtifacts, setHasMoreArtifacts] = useState(false);
+  const initialFetchRef = useRef(false);
+  const nextCursorRef = useRef(null);
+  const isFetchingRef = useRef(false);
+  const cooldownRef = useRef(false);
+
   const { getFreshToken } = useToken();
 
-  const fetchArtifactsData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    const fetchArtifacts = async (token) => {
-      try {
-        const base = `${SERVER_URL}/api/artifacts/${userId}`
-        const params = new URLSearchParams({ searchValue })
-        params.append('tags', '');
-        tagList.forEach(tag => params.append('tags', tag));
+  const fetchArtifactsData = useCallback(async ({ reset = false, limit = 5 } = {}) => {
+    if (isFetchingRef.current) return;
 
-        const url = `${base}?${params}`
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Unable to get artifact info");
-        const json = await res.json();
-        setArtifacts(json.data.artifacts.map(artifact => ({
-          id: artifact.id,
-          title: artifact.title,
-          content: artifact.textContent,
-          inputType: artifact.fileType,
-          tags: artifact.tags || []
-        })));
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    console.log("Fetching with search:", searchValue);
+    isFetchingRef.current = true;
+
+    if (reset) {
+      setArtifacts([]);
+      setHasMoreArtifacts(false);
+      setIsLoading(true);
+      nextCursorRef.current = null;
+    }
+
     const token = await getFreshToken();
-    if (token) {
-      fetchArtifacts(token);
+    if (!token) return;
+
+    try {
+      const base = `${SERVER_URL}/api/artifacts/${userId}`;
+      const query = new URLSearchParams({ searchValue });
+      query.append('tags', '');
+      tagList.forEach(tag => query.append('tags', tag));
+      query.append('limit', limit);
+      if (!reset && nextCursorRef.current) {
+        query.append('cursor', nextCursorRef.current);
+      }
+
+      const url = `${base}?${query}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Unable to get artifact info");
+      const json = await res.json();
+
+      const fetchedArtifacts = json.data.artifacts || [];
+      nextCursorRef.current = json.data.nextCursor;
+      setHasMoreArtifacts(json.data.hasMoreArtifacts);
+
+      setArtifacts(prev =>
+        reset
+          ? fetchedArtifacts.map(formatArtifact)
+          : [...prev, ...fetchedArtifacts.map(formatArtifact)]
+      );
+    } catch (err) {
+      setError(err);
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
     }
   }, [userId, SERVER_URL, searchValue, tagList, getFreshToken]);
 
+  const formatArtifact = (artifact) => ({
+    id: artifact.id,
+    title: artifact.title,
+    content: artifact.textContent,
+    inputType: artifact.fileType,
+    tags: artifact.tags || []
+  });
+
 
   useEffect(() => {
-    fetchArtifactsData();
+    if (!initialFetchRef.current) {
+      fetchArtifactsData();
+      initialFetchRef.current = true;
+    }
   }, [fetchArtifactsData]);
 
-
+  useEffect(() => {
+    if (initialFetchRef.current) {
+      setArtifacts([]);
+      setHasMoreArtifacts(false);
+      setIsLoading(true);
+      nextCursorRef.current = null;
+      fetchArtifactsData();
+    }
+  }, [fetchArtifactsData, searchValue, tagList]);
 
   const onRemoveTag = async (artifactId, tagId) => {
     const token = await getFreshToken();
@@ -185,6 +226,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   }
 
   const removeArtifact = async (artifactId) => {
+    if (hasMoreArtifacts) fetchArtifactsData({ limit: 1 });
     const token = await getFreshToken();
     const url = SERVER_URL + "/api/artifacts/" + userId + "/" + artifactId;
     fetch(url, {
@@ -240,39 +282,32 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
           )
         ));
   }
-  const cooldownRef = useRef(false);
 
   useEffect(() => {
-    function handleScroll() {
+    const handleScroll = () => {
       const screenHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       const currentHeight = window.scrollY + screenHeight;
 
-      if (documentHeight > screenHeight) {
-        if (currentHeight >= documentHeight * 0.75 && !cooldownRef.current) {
-          console.log("Add more");
-          cooldownRef.current = true;
+      if (
+        documentHeight > screenHeight &&
+        currentHeight >= documentHeight * 0.99 &&
+        hasMoreArtifacts &&
+        !cooldownRef.current &&
+        !isFetchingRef.current
+      ) {
+        cooldownRef.current = true;
+        fetchArtifactsData();
 
-          setTimeout(() => {
-            cooldownRef.current = false;
-          }, 500)
-        }
-        if (currentHeight >= documentHeight) {
-          console.log("You're at the bottom of the page.");
-        }
-      }
-    }
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (cooldownRef.current) {
-        clearTimeout(cooldownRef.current);
-        cooldownRef.current = null;
+        setTimeout(() => {
+          cooldownRef.current = false;
+        }, 100);
       }
     };
-  }, []);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [fetchArtifactsData, hasMoreArtifacts]);
 
   return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact };
 };

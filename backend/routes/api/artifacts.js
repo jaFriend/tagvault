@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { validationResult } from 'express-validator';
+import { validationResult, matchedData } from 'express-validator';
 
 const router = Router();
 import * as ArtifactController from '../../controllers/artifacts.js'
@@ -15,11 +15,20 @@ router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, resp
     });
   }
 
+  const data = matchedData(request, { locations: ['query', 'params'] });
+  const artifacts = await ArtifactController.getArtifacts(data.userId, data.searchValue, data.tags, data.limit, data.cursor);
+  const hasMoreArtifacts = artifacts.length === data.limit + 1;
+  if (hasMoreArtifacts) artifacts.pop();
+  const lastArtifact = artifacts[artifacts.length - 1];
+  const nextCursor = lastArtifact ? lastArtifact.id : null;
+
   try {
     response.status(200).json({
       status: "success",
       data: {
-        artifacts: await ArtifactController.getArtifacts(request.params.userId, request.query.searchValue, request.query.tags)
+        artifacts: artifacts,
+        nextCursor: nextCursor,
+        hasMoreArtifacts: hasMoreArtifacts
       }
     })
 

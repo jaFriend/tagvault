@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import './LandingPage.css';
 
 const LandingPage = () => {
-
   return (
     <div>
       <div className="landing-container">

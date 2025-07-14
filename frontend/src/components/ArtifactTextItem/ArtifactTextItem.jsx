@@ -11,6 +11,8 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedContent, setEditedContent] = useState(content);
 
+
+
   useEffect(() => {
     if (tagsScrollContainerRef.current && showAddTagInput) {
       tagsScrollContainerRef.current.scrollLeft = tagsScrollContainerRef.current.scrollWidth;
@@ -63,6 +65,39 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
     setEditedContent(content);
   };
 
+  const contentRef = useRef(null);
+  const [contentScrollable, setContentScrollable] = useState(false);
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+
+    function updateScrollState() {
+      const scrollTop = content.scrollTop;
+      const clientHeight = content.clientHeight;
+      const scrollHeight = content.scrollHeight;
+
+      const isScrollable = scrollHeight > clientHeight;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+
+      if (isScrollable && !isAtBottom) {
+        setContentScrollable(true);
+      } else {
+        setContentScrollable(false);
+      }
+    }
+
+    updateScrollState();
+    content.addEventListener("scroll", updateScrollState);
+
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      content.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
+
   return (
     <div className={styles.artifactCard}>
       <div className={styles.headerRow}>
@@ -110,9 +145,18 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
           aria-label="Edit artifact content"
         />
       ) : (
-        <div className={styles.scrollableContentWrapper}>
-          <p className={styles.content}>{content}</p>
-        </div>
+        <>
+          <div className={styles.scrollableContentWrapper}>
+            <div className={styles.scrollableInnerContent} ref={contentRef}>
+              <p className={styles.content}>{content}</p>
+            </div>
+            {contentScrollable && (
+              <p className={styles.scrollIndicator}>---</p>
+            )}
+          </div>
+
+
+        </>
       )}
 
       {isEditing && (

@@ -3,12 +3,10 @@ import styles from './UploadModal.module.css';
 
 const UploadModal = ({ isOpen, onClose, onUpload }) => {
   const [activeTab, setActiveTab] = useState('TEXT');
-
   const [textTitleInput, setTextTitleInput] = useState('');
   const [textBodyInput, setTextBodyInput] = useState('');
   const [fileTitleInput, setFileTitleInput] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
-
   if (!isOpen) {
     return null;
   }
@@ -67,11 +65,9 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
         >
           &times;
         </button>
-
         <div className={styles.modalTitleBar}>
           <h2 className={styles.modalTitle}>Upload Content</h2>
         </div>
-
         <div className={styles.tabNavigation}>
           <button
             className={`${styles.tabButton} ${activeTab === 'TEXT' ? styles.active : ''}`}
@@ -105,7 +101,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
                 className={styles.textInputField}
               />
             </div>
-
             <div className={styles.inputGroup}>
               <label htmlFor="text-body-input" className={styles.inputLabel}>
                 Text / Code / Paragraph
@@ -127,7 +122,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
                 className={`${styles.textInputField} ${styles.textAreaField}`}
               ></textarea>
             </div>
-
             <div className={styles.uploadButtonContainer}>
               <button
                 onClick={handleTextUpload}
@@ -139,7 +133,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
             </div>
           </div>
         )}
-
         {activeTab === 'FILE' && (
           <div className={`${styles.tabContent} ${styles.fileUploadForm}`}>
             <div className={styles.inputGroup}>
@@ -155,7 +148,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
                 className={styles.textInputField}
               />
             </div>
-
             <div className={styles.inputGroup}>
               <label htmlFor="file-upload-input" className={styles.inputLabel}>
                 Select File
@@ -170,7 +162,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
                 <p className={styles.selectedFileInfo}>Selected: {selectedFile.name}</p>
               )}
             </div>
-
             <div className={styles.uploadButtonContainer}>
               <button
                 onClick={handleFileUpload}

@@ -20,7 +20,10 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^4.0.0",
     "nodemon": "^3.1.10",
-    "prisma": "^6.8.2"
+    "prisma": "^6.8.2",
+    "supertest": "^7.1.3"
   }
 }
