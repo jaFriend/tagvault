@@ -1,30 +1,29 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import useToken from './useToken.jsx';
 
+const formatArtifact = (artifact) => ({
+  id: artifact.id,
+  title: artifact.title,
+  content: artifact.textContent,
+  inputType: artifact.fileType,
+  tags: artifact.tags || []
+});
+const _fakeTimeout = async (ms = 500) => await new Promise(resolve => setTimeout(resolve, ms));
 const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   const [artifacts, setArtifacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasMoreArtifacts, setHasMoreArtifacts] = useState(false);
-  const initialFetchRef = useRef(false);
-  const nextCursorRef = useRef(null);
+  const [cooldown, setCooldown] = useState(false);
+  const [initialFetch, setInitialFetch] = useState(false);
   const isFetchingRef = useRef(false);
-  const cooldownRef = useRef(false);
+  const nextCursorRef = useRef(null);
 
   const { getFreshToken } = useToken();
 
-  const fetchArtifactsData = useCallback(async ({ reset = false, limit = 5 } = {}) => {
+  const fetchArtifactsData = useCallback(async ({ limit = 5, isNewSearch = false } = {}) => {
     if (isFetchingRef.current) return;
-
-    console.log("Fetching with search:", searchValue);
     isFetchingRef.current = true;
-
-    if (reset) {
-      setArtifacts([]);
-      setHasMoreArtifacts(false);
-      setIsLoading(true);
-      nextCursorRef.current = null;
-    }
 
     const token = await getFreshToken();
     if (!token) return;
@@ -35,7 +34,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
       query.append('tags', '');
       tagList.forEach(tag => query.append('tags', tag));
       query.append('limit', limit);
-      if (!reset && nextCursorRef.current) {
+      if (nextCursorRef.current) {
         query.append('cursor', nextCursorRef.current);
       }
 
@@ -50,11 +49,9 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
       const fetchedArtifacts = json.data.artifacts || [];
       nextCursorRef.current = json.data.nextCursor;
       setHasMoreArtifacts(json.data.hasMoreArtifacts);
-
+      if (isNewSearch) setArtifacts([]);
       setArtifacts(prev =>
-        reset
-          ? fetchedArtifacts.map(formatArtifact)
-          : [...prev, ...fetchedArtifacts.map(formatArtifact)]
+        [...prev, ...fetchedArtifacts.map(formatArtifact)]
       );
     } catch (err) {
       setError(err);
@@ -64,93 +61,124 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
     }
   }, [userId, SERVER_URL, searchValue, tagList, getFreshToken]);
 
-  const formatArtifact = (artifact) => ({
-    id: artifact.id,
-    title: artifact.title,
-    content: artifact.textContent,
-    inputType: artifact.fileType,
-    tags: artifact.tags || []
-  });
-
-
   useEffect(() => {
-    if (!initialFetchRef.current) {
+    if (!initialFetch) {
+      setInitialFetch(true);
       fetchArtifactsData();
-      initialFetchRef.current = true;
-    }
-  }, [fetchArtifactsData]);
-
-  useEffect(() => {
-    if (initialFetchRef.current) {
-      setArtifacts([]);
+    } else {
       setHasMoreArtifacts(false);
       setIsLoading(true);
       nextCursorRef.current = null;
-      fetchArtifactsData();
+      fetchArtifactsData({ isNewSearch: true });
     }
-  }, [fetchArtifactsData, searchValue, tagList]);
+
+  }, [fetchArtifactsData, initialFetch, searchValue]);
 
   const onRemoveTag = async (artifactId, tagId) => {
-    const token = await getFreshToken();
-    const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags/' + tagId;
-    const json = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Unable to remove tag");
-        }
-        return res.json()
-      });
+    const index = artifacts.findIndex(item => item.id === artifactId);
+    const originalArtifact = index !== -1 ? artifacts[index] : undefined;
 
     setArtifacts(prevArtifacts =>
       prevArtifacts.map(artifact =>
         artifact.id === artifactId
-          ? { ...artifact, tags: json.data.tags || [] }
+          ? { ...artifact, tags: artifact.tags.filter(tag => tag.id !== tagId) }
           : artifact
       )
     );
-  }
+
+    const token = await getFreshToken();
+    if (!token) return;
+
+    try {
+      const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags/' + tagId;
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      });
+
+      if (!res.ok) throw new Error("Unable to remove tag");
+
+      const json = await res.json();
+
+      setArtifacts(prevArtifacts =>
+        prevArtifacts.map(artifact =>
+          artifact.id === artifactId
+            ? { ...artifact, tags: json.data.tags || [] }
+            : artifact
+        )
+      );
+    } catch (err) {
+      setArtifacts(prev => {
+        const newArray = [...prev];
+        if (originalArtifact) {
+          newArray[index] = originalArtifact;
+        }
+        return newArray;
+      });
+      console.log("Failed to remove tag: " + err);
+    }
+  };
 
   const onAddTag = async (artifactId, tagName) => {
-    const token = await getFreshToken();
-    const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags';
-    const json = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        "tagName": tagName
-      })
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Unable to add tag");
-        }
-        return res.json()
-      });
+    const index = artifacts.findIndex(item => item.id === artifactId);
+    const originalArtifact = index !== -1 ? artifacts[index] : undefined;
+
+    const tempTag = {
+      id: `temp-${Date.now()}`,
+      name: tagName,
+    };
 
     setArtifacts(prevArtifacts =>
       prevArtifacts.map(artifact =>
         artifact.id === artifactId
-          ? { ...artifact, tags: json.data.artifact.tags || [] }
+          ? { ...artifact, tags: [...artifact.tags, tempTag] }
           : artifact
       )
     );
-  }
 
-
-
-
-  const addArtifact = async ({ type, data }) => {
     const token = await getFreshToken();
-    console.log(type)
+    if (!token) return;
+
+    try {
+      const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags';
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          "tagName": tagName
+        })
+      });
+
+      if (!res.ok) throw new Error("Unable to add tag");
+
+      const json = await res.json();
+
+      setArtifacts(prevArtifacts =>
+        prevArtifacts.map(artifact =>
+          artifact.id === artifactId
+            ? { ...artifact, tags: json.data.artifact.tags || [] }
+            : artifact
+        )
+      );
+    } catch (err) {
+      setArtifacts(prev => {
+        const newArray = [...prev];
+        if (originalArtifact) {
+          newArray[index] = originalArtifact;
+        }
+        return newArray;
+      });
+      console.log("Failed to add tag: " + err);
+    }
+  }; const addArtifact = async ({ type, data }) => {
+    const token = await getFreshToken();
+    if (!token) return;
+
     if (type === 'TEXT') {
       addTextArtifact(token, data);
     } else if (type === 'FILE') {
@@ -160,37 +188,57 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   };
 
   const addTextArtifact = async (token, { title, text }) => {
-    const url = SERVER_URL + "/api/artifacts/" + userId;
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const tempArtifact = {
+      id: tempId,
+      title: title,
+      content: text,
+      inputType: "TEXT",
+      tags: []
+    }
+    setArtifacts(prevItems => [tempArtifact, ...prevItems]);
 
-      },
-      body: JSON.stringify({
-        "title": title,
-        "textContent": text,
-        "fileType": "TEXT"
-      })
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Unable to upload tag");
-        }
-        return res.json()
-      })
-      .then(artifactUpload => {
-        setArtifacts(prevItems => [{
-          id: artifactUpload.data.id,
-          title: artifactUpload.data.title,
-          content: artifactUpload.data.textContent,
-          inputType: artifactUpload.data.fileType,
-          tags: artifactUpload.data.tags || []
-        }, ...prevItems]);
+    try {
+      const url = SERVER_URL + "/api/artifacts/" + userId;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+
+        },
+        body: JSON.stringify({
+          "title": title,
+          "textContent": text,
+          "fileType": "TEXT"
+        })
       });
+
+      if (!res.ok) throw new Error("Unable to upload tag");
+
+      const artifactJSON = await res.json();
+
+      setArtifacts(prevItems => [
+        {
+          id: artifactJSON.data.id,
+          title: artifactJSON.data.title,
+          content: artifactJSON.data.textContent,
+          inputType: artifactJSON.data.fileType,
+          tags: artifactJSON.data.tags || []
+        },
+        ...prevItems.slice(1),
+      ]);
+
+
+    } catch (err) {
+      setArtifacts(prevItems => prevItems.slice(1))
+      console.log("Failed to upload Artifact: " + err);
+    }
+
   }
 
+  // TODO: Implement this function later,
+  // everything in this function is incomplete and needs changing
   const addFileArtifact = async (token, { title, data }) => {
     const url = SERVER_URL + "/api/artifacts/" + userId;
     fetch(url, {
@@ -226,62 +274,103 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   }
 
   const removeArtifact = async (artifactId) => {
-    if (hasMoreArtifacts) fetchArtifactsData({ limit: 1 });
+    const index = artifacts.findIndex(item => item.id === artifactId);
+    const artifact = artifacts.find(item => item.id === artifactId);
+    if (!artifact) {
+      console.log("Unable to find Artifact");
+      return;
+    }
+    setArtifacts(prev => prev.filter(item => item.id !== artifactId));
+
     const token = await getFreshToken();
-    const url = SERVER_URL + "/api/artifacts/" + userId + "/" + artifactId;
-    fetch(url, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Could not delete Artifact");
+    if (!token) return;
+
+    try {
+      const url = SERVER_URL + "/api/artifacts/" + userId + "/" + artifactId;
+
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-        return res.json()
       })
-      .then(json => setArtifacts(prevArtifacts => prevArtifacts.filter(artifact => artifact.id !== json.data.id)));
+
+      if (!res.ok) throw new Error("Could not delete Artifact");
+
+    } catch (err) {
+      setArtifacts(prev => {
+        const newArray = [...prev];
+        newArray.splice(index, 0, artifact);
+        return newArray;
+      });
+      console.log("Failed to remove Artifact: " + err);
+    } finally {
+      if (hasMoreArtifacts) fetchArtifactsData({ limit: 1 });
+    }
 
   };
-
   const editArtifact = async (artifactId, title, content) => {
+    const index = artifacts.findIndex(item => item.id === artifactId);
+    const originalArtifact = index !== -1 ? artifacts[index] : undefined;
+
+    setArtifacts(prevArtifacts =>
+      prevArtifacts.map(artifact =>
+        artifact.id === artifactId
+          ? {
+            ...artifact,
+            title: title,
+            content: content,
+          }
+          : artifact
+      )
+    );
+
     const token = await getFreshToken();
-    const url = SERVER_URL + "/api/artifacts/text/" + userId + "/" + artifactId;
+    if (!token) return;
 
-    fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+    try {
+      const url = SERVER_URL + "/api/artifacts/text/" + userId + "/" + artifactId;
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          "title": title,
+          "textContent": content,
+        })
+      });
 
-      },
-      body: JSON.stringify({
-        "title": title,
-        "textContent": content,
-      })
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Could not edit Artifact");
+      if (!res.ok) throw new Error("Could not edit Artifact");
+
+      const json = await res.json();
+
+      setArtifacts(prevArtifacts =>
+        prevArtifacts.map(artifact =>
+          artifact.id === artifactId
+            ? {
+              ...artifact,
+              title: json.data.title || '',
+              content: json.data.textContent || '',
+              inputType: json.data.fileType,
+              tags: json.data.tags || artifact.tags
+            }
+            : artifact
+        )
+      );
+    } catch (err) {
+
+      setArtifacts(prev => {
+        const newArray = [...prev];
+        if (originalArtifact) {
+          newArray[index] = originalArtifact;
         }
-        return res.json();
-      })
-      .then(json =>
-        setArtifacts(prevArtifacts =>
-          prevArtifacts.map(artifact =>
-            artifact.id === artifactId
-              ? {
-                ...artifact,
-                title: json.data.title || '',
-                content: json.data.textContent || '',
-                inputType: json.data.fileType,
-                tags: json.data.tags || artifact.tags
-              }
-              : artifact
-          )
-        ));
-  }
+        return newArray;
+      });
+      console.log("Failed to edit Artifact: " + err);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -293,21 +382,20 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
         documentHeight > screenHeight &&
         currentHeight >= documentHeight * 0.99 &&
         hasMoreArtifacts &&
-        !cooldownRef.current &&
-        !isFetchingRef.current
+        !cooldown
       ) {
-        cooldownRef.current = true;
+        setCooldown(true);
         fetchArtifactsData();
 
         setTimeout(() => {
-          cooldownRef.current = false;
+          setCooldown(false);
         }, 100);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [fetchArtifactsData, hasMoreArtifacts]);
+  }, [fetchArtifactsData, cooldown, hasMoreArtifacts]);
 
   return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact };
 };

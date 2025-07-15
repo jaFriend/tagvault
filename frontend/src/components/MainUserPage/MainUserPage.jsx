@@ -16,13 +16,14 @@ const MainUserPage = () => {
   const handleFileModalOpen = () => { setIsFileModalOpen(true); };
   const handleFileModalClose = () => { setIsFileModalOpen(false); };
   const [searchValue, setSearchValue] = useState('');
-  const [tagList, setTagList] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
 
-  const { artifacts, isLoadingArtifacts, artifactError,
-    addArtifact, removeArtifact, onRemoveTag,
-    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, SERVER_URL, searchValue, tagList);
+
   const { tags, isLoadingTags, tagError,
     addTag, removeTag, fetchTagsData } = useTags(user.id, SERVER_URL);
+  const { artifacts, isLoadingArtifacts, artifactError,
+    addArtifact, removeArtifact, onRemoveTag,
+    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, SERVER_URL, searchValue, selectedTagIds);
 
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
@@ -33,10 +34,10 @@ const MainUserPage = () => {
     fetchTagsData();
   }, [onAddTag, fetchTagsData]);
 
-  const fetchTagsDataOnRemoveTag = async (artifactId, tagId) => {
+  const fetchTagsDataOnRemoveTag = useCallback(async (artifactId, tagId) => {
     await onRemoveTag(artifactId, tagId);
     fetchTagsData();
-  };
+  }, [onRemoveTag, fetchTagsData]);
 
   const fetchArtifactsOnRemoveTag = async (tagId) => {
     addRemoveSelectedTag(tagId, false);
@@ -50,13 +51,10 @@ const MainUserPage = () => {
 
 
   const addRemoveSelectedTag = (id, next) => {
-    setTagList(prev => {
-      if (next) {
-        return prev.includes(id) ? prev : [...prev, id];
-      } else {
-        return prev.filter(tag => tag !== id);
-      }
-    });
+    if (next)
+      setSelectedTagIds(prev => prev.includes(id) ? prev : [...prev, id]);
+    else
+      setSelectedTagIds(prev => prev.includes(id) ? prev.filter(tag => tag !== id) : prev);
   };
 
   return (

@@ -1,8 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react'
 
-
-
 const useToken = () => {
   const tokenRef = useRef(null);
   const tokenExpiresRef = useRef(null);
