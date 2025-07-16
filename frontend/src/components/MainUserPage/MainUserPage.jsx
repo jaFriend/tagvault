@@ -8,7 +8,6 @@ import TagItem from '../TagItem'
 import ArtifactList from '../ArtifactList';
 import useArtifacts from '../../hooks/useArtifacts';
 import useTags from '../../hooks/useTags';
-const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 const MainUserPage = () => {
   const { user } = useUser();
@@ -17,14 +16,11 @@ const MainUserPage = () => {
   const handleFileModalClose = () => { setIsFileModalOpen(false); };
   const [searchValue, setSearchValue] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState([]);
-
-
   const { tags, isLoadingTags, tagError,
-    addTag, removeTag, fetchTagsData } = useTags(user.id, SERVER_URL);
+    addTag, removeTag, fetchTagsData } = useTags(user.id);
   const { artifacts, isLoadingArtifacts, artifactError,
     addArtifact, removeArtifact, onRemoveTag,
-    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, SERVER_URL, searchValue, selectedTagIds);
-
+    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, searchValue, selectedTagIds);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
@@ -48,7 +44,6 @@ const MainUserPage = () => {
   const searchSubmit = (value) => {
     setSearchValue(value);
   }
-
 
   const addRemoveSelectedTag = (id, next) => {
     if (next)

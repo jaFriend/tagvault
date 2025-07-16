@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import vaultRequest, { vaultRequests } from '../services/requests';
 import useToken from './useToken.jsx';
 
 const formatArtifact = (artifact) => ({
@@ -8,8 +9,8 @@ const formatArtifact = (artifact) => ({
   inputType: artifact.fileType,
   tags: artifact.tags || []
 });
-const _fakeTimeout = async (ms = 500) => await new Promise(resolve => setTimeout(resolve, ms));
-const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
+
+const useArtifacts = (userId, searchValue, tagList) => {
   const [artifacts, setArtifacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +19,6 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   const [initialFetch, setInitialFetch] = useState(false);
   const isFetchingRef = useRef(false);
   const nextCursorRef = useRef(null);
-
   const { getFreshToken } = useToken();
 
   const fetchArtifactsData = useCallback(async ({ limit = 5, isNewSearch = false } = {}) => {
@@ -29,7 +29,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
     if (!token) return;
 
     try {
-      const base = `${SERVER_URL}/api/artifacts/${userId}`;
+      const base = `/api/artifacts/${userId}`;
       const query = new URLSearchParams({ searchValue });
       query.append('tags', '');
       tagList.forEach(tag => query.append('tags', tag));
@@ -38,14 +38,13 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
         query.append('cursor', nextCursorRef.current);
       }
 
-      const url = `${base}?${query}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await vaultRequest({
+        method: vaultRequests.GET,
+        path: `${base}?${query}`,
+        headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (!res.ok) throw new Error("Unable to get artifact info");
-      const json = await res.json();
-
+      const json = res.data;
       const fetchedArtifacts = json.data.artifacts || [];
       nextCursorRef.current = json.data.nextCursor;
       setHasMoreArtifacts(json.data.hasMoreArtifacts);
@@ -59,7 +58,7 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
-  }, [userId, SERVER_URL, searchValue, tagList, getFreshToken]);
+  }, [userId, searchValue, tagList, getFreshToken]);
 
   useEffect(() => {
     if (!initialFetch) {
@@ -90,17 +89,15 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
     if (!token) return;
 
     try {
-      const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags/' + tagId;
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+      const url = `/api/artifacts/${userId}/${artifactId}/tags/${tagId}`;
+
+      const res = await vaultRequest({
+        method: vaultRequests.DELETE,
+        headers: { Authorization: `Bearer ${token}` },
+        path: url,
       });
 
-      if (!res.ok) throw new Error("Unable to remove tag");
-
-      const json = await res.json();
+      const json = res.data;
 
       setArtifacts(prevArtifacts =>
         prevArtifacts.map(artifact =>
@@ -124,7 +121,6 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
   const onAddTag = async (artifactId, tagName) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const originalArtifact = index !== -1 ? artifacts[index] : undefined;
-
     const tempTag = {
       id: `temp-${Date.now()}`,
       name: tagName,
@@ -140,23 +136,17 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
 
     const token = await getFreshToken();
     if (!token) return;
-
     try {
-      const url = SERVER_URL + "/api/artifacts/" + userId + '/' + artifactId + '/tags';
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const url = `/api/artifacts/${userId}/${artifactId}/tags`;
+      const res = await vaultRequest({
+        method: vaultRequests.POST,
+        headers: { Authorization: `Bearer ${token}` },
+        path: url,
+        payload: {
           "tagName": tagName
-        })
+        },
       });
-
-      if (!res.ok) throw new Error("Unable to add tag");
-
-      const json = await res.json();
+      const json = res.data;
 
       setArtifacts(prevArtifacts =>
         prevArtifacts.map(artifact =>
@@ -197,52 +187,42 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
       tags: []
     }
     setArtifacts(prevItems => [tempArtifact, ...prevItems]);
-
     try {
-      const url = SERVER_URL + "/api/artifacts/" + userId;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-
-        },
-        body: JSON.stringify({
+      const url = `/api/artifacts/${userId}`;
+      const res = await vaultRequest({
+        method: vaultRequests.POST,
+        headers: { Authorization: `Bearer ${token}` },
+        path: url,
+        payload: {
           "title": title,
           "textContent": text,
           "fileType": "TEXT"
-        })
+        },
       });
-
-      if (!res.ok) throw new Error("Unable to upload tag");
-
-      const artifactJSON = await res.json();
+      const json = res.data;
 
       setArtifacts(prevItems => [
         {
-          id: artifactJSON.data.id,
-          title: artifactJSON.data.title,
-          content: artifactJSON.data.textContent,
-          inputType: artifactJSON.data.fileType,
-          tags: artifactJSON.data.tags || []
+          id: json.data.id,
+          title: json.data.title,
+          content: json.data.textContent,
+          inputType: json.data.fileType,
+          tags: json.data.tags || []
         },
         ...prevItems.slice(1),
       ]);
-
-
     } catch (err) {
       setArtifacts(prevItems => prevItems.slice(1))
       console.log("Failed to upload Artifact: " + err);
     }
-
   }
 
   // TODO: Implement this function later,
   // everything in this function is incomplete and needs changing
   const addFileArtifact = async (token, { title, data }) => {
-    const url = SERVER_URL + "/api/artifacts/" + userId;
+    const url = `/api/artifacts/${userId}`;
     fetch(url, {
-      method: "POST",
+      method: vaultRequests.POST,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
@@ -284,19 +264,13 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
 
     const token = await getFreshToken();
     if (!token) return;
-
     try {
-      const url = SERVER_URL + "/api/artifacts/" + userId + "/" + artifactId;
-
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-
-      if (!res.ok) throw new Error("Could not delete Artifact");
-
+      const url = `/api/artifacts/${userId}/${artifactId}`;
+      await vaultRequest({
+        method: vaultRequests.DELETE,
+        headers: { Authorization: `Bearer ${token}` },
+        path: url,
+      });
     } catch (err) {
       setArtifacts(prev => {
         const newArray = [...prev];
@@ -329,22 +303,18 @@ const useArtifacts = (userId, SERVER_URL, searchValue, tagList) => {
     if (!token) return;
 
     try {
-      const url = SERVER_URL + "/api/artifacts/text/" + userId + "/" + artifactId;
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const url = `/api/artifacts/text/${userId}/${artifactId}`;
+
+      const res = await vaultRequest({
+        method: vaultRequests.PATCH,
+        headers: { Authorization: `Bearer ${token}` },
+        path: url,
+        payload: {
           "title": title,
           "textContent": content,
-        })
+        },
       });
-
-      if (!res.ok) throw new Error("Could not edit Artifact");
-
-      const json = await res.json();
+      const json = res.data;
 
       setArtifacts(prevArtifacts =>
         prevArtifacts.map(artifact =>

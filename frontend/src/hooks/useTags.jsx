@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import vaultRequest, { vaultRequests } from '../services/requests';
 import useToken from './useToken.jsx';
 
-const _fakeTimeout = async (ms = 500) => await new Promise(resolve => setTimeout(resolve, ms));
-const useTags = (userId, SERVER_URL) => {
+const useTags = (userId) => {
   const [tags, setTags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,18 +16,13 @@ const useTags = (userId, SERVER_URL) => {
     setIsLoading(true);
     setError(null);
     try {
-      const url = `${SERVER_URL}/api/tags/${userId}`;
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-
+      const url = `/api/tags/${userId}`;
+      const res = await vaultRequest({
+        method: vaultRequests.GET,
+        path: url,
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Unable to get tag info");
-      }
-      const json = await res.json();
+      const json = res.data;
       setTags(json?.data?.tags?.map(tag => ({
         id: tag.id,
         name: tag.name
@@ -38,7 +33,7 @@ const useTags = (userId, SERVER_URL) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, SERVER_URL, getFreshToken]);
+  }, [userId, getFreshToken]);
 
   useEffect(() => {
     fetchTagsData();
@@ -70,18 +65,14 @@ const useTags = (userId, SERVER_URL) => {
     if (!token) return;
 
     try {
-      const url = SERVER_URL + "/api/tags/" + userId;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ "tagName": title })
+      const url = "/api/tags/" + userId;
+      const res = await vaultRequest({
+        method: vaultRequests.POST,
+        path: url,
+        headers: { Authorization: `Bearer ${token}` },
+        payload: { tagName: title }
       });
-
-      if (!res.ok) throw new Error("Unable to upload tag");
-      const tagUpload = await res.json();
+      const tagUpload = res.data;
       const tagsWithoutTemp = tags.filter(tag => tag.id !== tempId);
       const realTag = {
         id: tagUpload.data.id,
@@ -105,16 +96,12 @@ const useTags = (userId, SERVER_URL) => {
     if (!token) return;
 
     try {
-      const url = SERVER_URL + "/api/tags/" + userId + "/" + tagId;
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const url = "/api/tags/" + userId + "/" + tagId;
+      await vaultRequest({
+        method: vaultRequests.DELETE,
+        path: url,
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!res.ok) throw new Error("Could not delete Tag");
-
     } catch (err) {
       setTags(prevTags => {
         const newArray = [...prevTags];
