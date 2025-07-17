@@ -53,7 +53,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
         [...prev, ...fetchedArtifacts.map(formatArtifact)]
       );
     } catch (err) {
-      setError(err);
+      setError(err.message);
     } finally {
       isFetchingRef.current = false;
       setIsLoading(false);
@@ -114,7 +114,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
         }
         return newArray;
       });
-      console.log("Failed to remove tag: " + err);
+      setError(err.message);
     }
   };
 
@@ -163,7 +163,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
         }
         return newArray;
       });
-      console.log("Failed to add tag: " + err);
+      setError(err.message);
     }
   }; const addArtifact = async ({ type, data }) => {
     const token = await getFreshToken();
@@ -213,7 +213,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
       ]);
     } catch (err) {
       setArtifacts(prevItems => prevItems.slice(1))
-      console.log("Failed to upload Artifact: " + err);
+      setError(err.message);
     }
   }
 
@@ -257,7 +257,6 @@ const useArtifacts = (userId, searchValue, tagList) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const artifact = artifacts.find(item => item.id === artifactId);
     if (!artifact) {
-      console.log("Unable to find Artifact");
       return;
     }
     setArtifacts(prev => prev.filter(item => item.id !== artifactId));
@@ -277,7 +276,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
         newArray.splice(index, 0, artifact);
         return newArray;
       });
-      console.log("Failed to remove Artifact: " + err);
+      setError(err.message);
     } finally {
       if (hasMoreArtifacts) fetchArtifactsData({ limit: 1 });
     }
@@ -338,7 +337,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
         }
         return newArray;
       });
-      console.log("Failed to edit Artifact: " + err);
+      setError(err.message);
     }
   };
 
@@ -366,6 +365,10 @@ const useArtifacts = (userId, searchValue, tagList) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchArtifactsData, cooldown, hasMoreArtifacts]);
+
+  useEffect(() => {
+    if (error) setError(null);
+  }, [error]);
 
   return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact };
 };

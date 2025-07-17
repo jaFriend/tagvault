@@ -1,0 +1,93 @@
+.ErrorContainer {
+  display: flex;
+  background-color: white;
+  align-items: center;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 500px;
+  max-width: 90vw;
+  height: 60px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+
+.ErrorLabel {
+  flex-shrink: 0;
+  width: 15%;
+  height: 100%;
+  font-size: 24px;
+  background-color: #ff4d4f;
+  border-right: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+}
+
+.ErrorTextContainer {
+  padding-left: 5%;
+  flex-grow: 1;
+  text-align: left;
+  display: block;
+}
+
+.ErrorText {
+  display: inline;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.ErrorTextContent {
+  display: inline;
+  font-size: 16px;
+}
+
+.ErrorProgressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: #ff4d4f;
+  width: 100%;
+  animation-name: progressBarShrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes progressBarShrink {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+@media (max-width: 480px) {
+  .ErrorContainer {
+    width: 90vw;
+    min-width: unset;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .ErrorLabel {
+    font-size: 20px;
+  }
+
+  .ErrorText {
+    font-size: 14px;
+  }
+
+  .ErrorTextContent {
+    font-size: 14px;
+  }
+}

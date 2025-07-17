@@ -15,7 +15,7 @@ router.post('/:userId', ClerkJWTAuth, async (request, response) => {
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while creating a tag. Please try again later.",
     })
   }
 });
@@ -31,7 +31,7 @@ router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while deleting the tag. Please try again later.",
     })
   }
 });
@@ -49,7 +49,7 @@ router.get('/:userId', ClerkJWTAuth, async (request, response) => {
   } catch (err) {
     response.status(500).json({
       status: 'error',
-      message: err.message
+      message: "An unexpected error occurred while retrieving tags. Please try again later.",
     })
   }
 });

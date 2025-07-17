@@ -1,5 +1,5 @@
 import axios from 'axios';
-import vaultURL from './config';
+import { vaultURL } from './config';
 
 const client = axios.create({
   baseURL: vaultURL, headers: {
@@ -26,16 +26,9 @@ const vaultRequest = async ({ method = vaultRequests.GET, path = '', payload = {
     return await client(options);
   } catch (error) {
     if (error.response) {
-      const status = error.response.status;
-      if (status === 401) {
-        throw new Error("Unauthorized - check your token");
-      } else if (status === 404) {
-        throw new Error("Resource not found");
-      } else if (status >= 500) {
-        throw new Error("Server error - please try again later");
-      } else {
-        throw new Error(`Unable to get artifact info: ${error.response.statusText}`);
-      }
+      const message = error.response.data?.message || error.response.statusText || "An unexpected error occurred";
+
+      throw new Error(message);
     } else if (error.request) {
       throw new Error("Network error - please check your connection");
     } else {

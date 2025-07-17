@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './MainUserPage.module.css';
 import { useUser } from '@clerk/clerk-react'
 import SearchInput from '../SearchInput';
@@ -8,22 +8,47 @@ import TagItem from '../TagItem'
 import ArtifactList from '../ArtifactList';
 import useArtifacts from '../../hooks/useArtifacts';
 import useTags from '../../hooks/useTags';
+import ErrorBanner from '../ErrorBanner/ErrorBanner';
 
 const MainUserPage = () => {
   const { user } = useUser();
+  const [error, setError] = useState(null);
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
-  const handleFileModalOpen = () => { setIsFileModalOpen(true); };
-  const handleFileModalClose = () => { setIsFileModalOpen(false); };
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState([]);
-  const { tags, isLoadingTags, tagError,
-    addTag, removeTag, fetchTagsData } = useTags(user.id);
-  const { artifacts, isLoadingArtifacts, artifactError,
-    addArtifact, removeArtifact, onRemoveTag,
-    onAddTag, fetchArtifactsData, editArtifact } = useArtifacts(user.id, searchValue, selectedTagIds);
-  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+  const {
+    tags,
+    isLoading: isLoadingTags,
+    error: tagError,
+    addTag,
+    removeTag,
+    fetchTagsData
+  } = useTags(user.id);
+  const {
+    artifacts,
+    isLoading: isLoadingArtifacts,
+    error: artifactError,
+    addArtifact,
+    removeArtifact,
+    onRemoveTag,
+    onAddTag,
+    fetchArtifactsData,
+    editArtifact
+  } = useArtifacts(user.id, searchValue, selectedTagIds);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
+  const handleFileModalOpen = () => { setIsFileModalOpen(true); };
+  const handleFileModalClose = () => { setIsFileModalOpen(false); };
+
+  useEffect(() => {
+    if (artifactError) {
+      setError(artifactError);
+    } else if (tagError) {
+      setError(tagError);
+    }
+  }, [artifactError, tagError]);
+
 
   const fetchTagsDataOnAddTag = useCallback(async (artifactId, tagName) => {
     await onAddTag(artifactId, tagName);
@@ -90,7 +115,6 @@ const MainUserPage = () => {
         </div>
         <h2>Your Artifacts</h2>
         {isLoadingArtifacts && <p>Loading artifacts...</p>}
-        {artifactError && <p className={styles.errorMessage}>Error loading artifacts: {artifactError}</p>}
         {!isLoadingArtifacts && !artifactError && artifacts.length === 0 && (
           <p>You haven't uploaded any text artifacts yet. Click "Upload New Artifact" to add some!</p>
         )}
@@ -117,6 +141,7 @@ const MainUserPage = () => {
         onClose={handleTagModalClose}
         onUpload={addTag}
       />
+      {error && <ErrorBanner message={error} onClose={() => setError(null)} />}
     </div>
   );
 };

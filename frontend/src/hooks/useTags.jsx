@@ -14,7 +14,6 @@ const useTags = (userId) => {
     if (!token) return;
 
     setIsLoading(true);
-    setError(null);
     try {
       const url = `/api/tags/${userId}`;
       const res = await vaultRequest({
@@ -28,8 +27,7 @@ const useTags = (userId) => {
         name: tag.name
       })));
     } catch (err) {
-      console.error("Error fetching tags:", err);
-      setError(err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +81,6 @@ const useTags = (userId) => {
     } catch (err) {
       setTags(prevTags => prevTags.filter(tag => tag.id !== tempId));
       setError(err.message || "Failed to add tag");
-      console.log("Failed to add tag: " + err);
     }
   };
 
@@ -111,9 +108,14 @@ const useTags = (userId) => {
         return newArray;
       });
       setError(err.message || "Failed to remove tag");
-      console.log("Failed to remove tag: " + err);
     }
   };
+
+
+  useEffect(() => {
+    if (error) setError(null);
+  }, [error])
+
   return { tags, isLoading, error, addTag, removeTag, fetchTagsData };
 }
 export default useTags;

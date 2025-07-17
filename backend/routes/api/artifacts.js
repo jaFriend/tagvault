@@ -9,20 +9,20 @@ import ClerkJWTAuth from '../../validators/jwtauth.js';
 router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, response) => {
   const errors = validationResult(request)
   if (!errors.isEmpty()) {
-    return response.status(500).json({
+    return response.status(400).json({
       status: "error",
-      message: errors.array()
+      message: "Invalid request paramteres."
     });
   }
 
   const data = matchedData(request, { locations: ['query', 'params'] });
-  const artifacts = await ArtifactController.getArtifacts(data.userId, data.searchValue, data.tags, data.limit, data.cursor);
-  const hasMoreArtifacts = artifacts.length === data.limit + 1;
-  if (hasMoreArtifacts) artifacts.pop();
-  const lastArtifact = artifacts[artifacts.length - 1];
-  const nextCursor = lastArtifact ? lastArtifact.id : null;
 
   try {
+    const artifacts = await ArtifactController.getArtifacts(data.userId, data.searchValue, data.tags, data.limit, data.cursor);
+    const hasMoreArtifacts = artifacts.length === data.limit + 1;
+    if (hasMoreArtifacts) artifacts.pop();
+    const lastArtifact = artifacts[artifacts.length - 1];
+    const nextCursor = lastArtifact ? lastArtifact.id : null;
     response.status(200).json({
       status: "success",
       data: {
@@ -35,7 +35,7 @@ router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, resp
   } catch (err) {
     response.status(500).json({
       status: 'error',
-      message: err.message
+      message: "An unexpected error occurred while retrieving artifacts. Please try again later."
     })
   }
 });
@@ -44,11 +44,13 @@ router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, resp
 router.post('/:userId', artifactValidator, ClerkJWTAuth, async (request, response) => {
   const errors = validationResult(request)
   if (!errors.isEmpty()) {
-    return response.status(500).json({
+    return response.status(400).json({
       status: "error",
-      message: errors.array()
+      message: "Invalid request paramteres."
     });
   }
+
+
   try {
     if (request.body.fileType === "TEXT") {
       response.status(200).json({
@@ -64,7 +66,7 @@ router.post('/:userId', artifactValidator, ClerkJWTAuth, async (request, respons
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while creating the artifact. Please try again later.",
     })
   }
 });
@@ -79,7 +81,7 @@ router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while deleting the artifact. Please try again later.",
     })
   }
 });
@@ -97,7 +99,7 @@ router.post('/:userId/:artifactId/tags', ClerkJWTAuth, async (request, response)
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while adding the tag. Please try again later.",
     });
   }
 });
@@ -114,7 +116,7 @@ router.delete('/:userId/:artifactId/tags/:tagId', ClerkJWTAuth, async (request, 
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while removing the tag. Please try again later.",
     });
   }
 });
@@ -131,7 +133,7 @@ router.patch('/text/:userId/:artifactId', ClerkJWTAuth, async (request, response
   } catch (err) {
     response.status(500).json({
       status: "error",
-      message: err.message
+      message: "An unexpected error occurred while updating the artifact. Please try again later.",
     });
   }
 });
