@@ -136,7 +136,8 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
             </button>
           )}
         </div>
-      </div>      {isEditing ? (
+      </div>
+      {isEditing ? (
         <textarea
           className={styles.editContentTextarea}
           value={editedContent}

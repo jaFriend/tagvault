@@ -34,7 +34,8 @@ const MainUserPage = () => {
     onRemoveTag,
     onAddTag,
     fetchArtifactsData,
-    editArtifact
+    editArtifact,
+    hasMoreArtifacts
   } = useArtifacts(user.id, searchValue, selectedTagIds);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
@@ -48,7 +49,6 @@ const MainUserPage = () => {
       setError(tagError);
     }
   }, [artifactError, tagError]);
-
 
   const fetchTagsDataOnAddTag = useCallback(async (artifactId, tagName) => {
     await onAddTag(artifactId, tagName);
@@ -79,7 +79,7 @@ const MainUserPage = () => {
 
   return (
     <div className={styles.mainContainer}>
-      <h1>Welcome to your TagVault Dashboard!</h1>
+      <h1 className={styles.boldText}>Welcome to your TagVault Dashboard!</h1>
       <SearchInput onSearchSubmit={searchSubmit} />
       <button
         onClick={handleFileModalOpen}
@@ -95,14 +95,13 @@ const MainUserPage = () => {
       </button>
 
       <div className={styles.contentContainer}>
-        <h2>Your Tags</h2>
+        <h2 className={styles.boldText}>Your Tags</h2>
         {isLoadingTags && <p>Loading tags...</p>}
-        {tagError && <p className={styles.errorMessage}>Error loading tags: {tagError}</p>}
-        {!isLoadingTags && !tagError && tags.length === 0 && (
+        {!isLoadingTags && tags.length === 0 && (
           <p>No tags created yet. Click "Upload New Tag" to add some!</p>
         )}
         <div className={styles.tagGrid}>
-          {!isLoadingTags && !tagError && tags.map((tag) => (
+          {!isLoadingTags && tags.map((tag) => (
             <TagItem
               key={tag.id}
               name={tag.name}
@@ -113,22 +112,24 @@ const MainUserPage = () => {
             />
           ))}
         </div>
-        <h2>Your Artifacts</h2>
+        <h2 className={styles.boldText}>Your Artifacts</h2>
         {isLoadingArtifacts && <p>Loading artifacts...</p>}
-        {!isLoadingArtifacts && !artifactError && artifacts.length === 0 && (
+        {!isLoadingArtifacts && artifacts.length === 0 && (
           <p>You haven't uploaded any text artifacts yet. Click "Upload New Artifact" to add some!</p>
         )}
-        <div className={styles.artifactGrid}>
-          {!isLoadingArtifacts && !artifactError && (
+        {!isLoadingArtifacts && !artifactError && artifacts.length > 0 && (
+          <div className={styles.artifactGrid}>
             <ArtifactList
               artifacts={artifacts}
+              fetchArtifactsData={fetchArtifactsData}
               onRemoveArtifact={removeArtifact}
               onAddTag={fetchTagsDataOnAddTag}
               onRemoveTag={fetchTagsDataOnRemoveTag}
               onEditArtifact={editArtifact}
+              hasMoreItems={hasMoreArtifacts}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <UploadModal

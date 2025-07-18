@@ -1,0 +1,14 @@
+.listScrollIndicator {
+  position: absolute;
+  margin: 0px;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 1.2em;
+  color: transparent;
+  background: linear-gradient(to top, rgba(50, 50, 50, 1), rgba(50, 50, 50, 0));
+
+  padding-bottom: 4px;
+  pointer-events: none;
+}

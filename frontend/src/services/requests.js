@@ -1,10 +1,19 @@
 import axios from 'axios';
 import { vaultURL } from './config';
+import { authTokenManager } from './authTokenManager';
 
 const client = axios.create({
   baseURL: vaultURL, headers: {
     'Content-Type': 'application/json',
   }
+});
+
+client.interceptors.request.use(async (config) => {
+  const token = await authTokenManager.getFreshToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 const vaultRequests = {

@@ -9,26 +9,33 @@
 }
 
 .artifactCard {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 380px;
-  min-width: 380px;
-  flex-basis: calc(33% - 20px);
-  box-sizing: border-box;
-  position: relative;
   display: flex;
   flex-direction: column;
+  height: 550px;
+  width: 380px;
+  padding: 0px 16px 16px 16px;
+  box-sizing: border-box;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .cardActions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  position: relative;
+  top: 8px;
+  right: 8px;
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
+  z-index: 10;
 }
 
 .actionButton {
@@ -75,12 +82,17 @@
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  color: var(--color-dark-blue-gray);
-  word-wrap: break-word;
+  flex-grow: 1;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  margin: 0px;
+  margin-top: 20px;
+  flex-grow: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .editTitleInput {
@@ -222,42 +234,4 @@
 .addTagButton:hover {
   background-color: var(--color-dark-blue-gray);
   color: var(--color-lightest-gray);
-}
-
-
-@media (max-width: 600px) {
-  .artifactCard {
-    padding: 1rem;
-  }
-
-  .cardActions {
-    top: 0.75rem;
-    right: 0.75rem;
-    gap: 0.3rem;
-  }
-
-  .actionButton {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-  }
-
-  .removeButton {
-    font-size: 1rem;
-  }
-
-  .title {
-    font-size: 1.3rem;
-  }
-
-  .editTitleInput {
-    font-size: 1.3rem;
-  }
-
-  .fileInfo p {
-    font-size: 0.9em;
-  }
-
-  .tagsSeparator {
-    font-size: 0.85em;
-  }
 }

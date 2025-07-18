@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import vaultRequest, { vaultRequests } from '../services/requests';
-import useToken from './useToken.jsx';
 
-const formatArtifact = (artifact) => ({
+const formatTextArtifact = (artifact) => ({
   id: artifact.id,
   title: artifact.title,
   content: artifact.textContent,
@@ -10,23 +9,39 @@ const formatArtifact = (artifact) => ({
   tags: artifact.tags || []
 });
 
+const formatFileArtifact = (artifact) => ({
+  id: artifact.id,
+  title: artifact.title,
+  filename: artifact.fileName,
+  fileURL: artifact.fileUrl,
+  inputType: artifact.fileType,
+  tags: artifact.tags || [],
+  isImage: artifact.isImage
+});
+
+
 const useArtifacts = (userId, searchValue, tagList) => {
-  const [artifacts, setArtifacts] = useState([]);
+  const [artifacts, setArtifacts] = useState([
+    {
+      id: "123413-551",
+      title: "Test",
+      filename: "coolage.txt",
+      fileURL: "https://example.com/",
+      inputType: "FILE",
+      tags: [],
+      isImage: false
+    }
+  ]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasMoreArtifacts, setHasMoreArtifacts] = useState(false);
-  const [cooldown, setCooldown] = useState(false);
   const [initialFetch, setInitialFetch] = useState(false);
   const isFetchingRef = useRef(false);
   const nextCursorRef = useRef(null);
-  const { getFreshToken } = useToken();
 
-  const fetchArtifactsData = useCallback(async ({ limit = 5, isNewSearch = false } = {}) => {
+  const fetchArtifactsData = useCallback(async ({ limit = 6, isNewSearch = false } = {}) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
-
-    const token = await getFreshToken();
-    if (!token) return;
 
     try {
       const base = `/api/artifacts/${userId}`;
@@ -41,7 +56,6 @@ const useArtifacts = (userId, searchValue, tagList) => {
       const res = await vaultRequest({
         method: vaultRequests.GET,
         path: `${base}?${query}`,
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       const json = res.data;
@@ -50,7 +64,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
       setHasMoreArtifacts(json.data.hasMoreArtifacts);
       if (isNewSearch) setArtifacts([]);
       setArtifacts(prev =>
-        [...prev, ...fetchedArtifacts.map(formatArtifact)]
+        [...prev, ...fetchedArtifacts.map(formatTextArtifact)]
       );
     } catch (err) {
       setError(err.message);
@@ -58,7 +72,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
-  }, [userId, searchValue, tagList, getFreshToken]);
+  }, [userId, searchValue, tagList]);
 
   useEffect(() => {
     if (!initialFetch) {
@@ -85,15 +99,12 @@ const useArtifacts = (userId, searchValue, tagList) => {
       )
     );
 
-    const token = await getFreshToken();
-    if (!token) return;
 
     try {
       const url = `/api/artifacts/${userId}/${artifactId}/tags/${tagId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.DELETE,
-        headers: { Authorization: `Bearer ${token}` },
         path: url,
       });
 
@@ -134,13 +145,10 @@ const useArtifacts = (userId, searchValue, tagList) => {
       )
     );
 
-    const token = await getFreshToken();
-    if (!token) return;
     try {
       const url = `/api/artifacts/${userId}/${artifactId}/tags`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
-        headers: { Authorization: `Bearer ${token}` },
         path: url,
         payload: {
           "tagName": tagName
@@ -166,18 +174,16 @@ const useArtifacts = (userId, searchValue, tagList) => {
       setError(err.message);
     }
   }; const addArtifact = async ({ type, data }) => {
-    const token = await getFreshToken();
-    if (!token) return;
 
     if (type === 'TEXT') {
-      addTextArtifact(token, data);
+      addTextArtifact(data);
     } else if (type === 'FILE') {
-      addFileArtifact(token, data);
+      addFileArtifact(data);
     }
 
   };
 
-  const addTextArtifact = async (token, { title, text }) => {
+  const addTextArtifact = async ({ title, text }) => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`
     const tempArtifact = {
       id: tempId,
@@ -191,7 +197,6 @@ const useArtifacts = (userId, searchValue, tagList) => {
       const url = `/api/artifacts/${userId}`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
-        headers: { Authorization: `Bearer ${token}` },
         path: url,
         payload: {
           "title": title,
@@ -219,13 +224,12 @@ const useArtifacts = (userId, searchValue, tagList) => {
 
   // TODO: Implement this function later,
   // everything in this function is incomplete and needs changing
-  const addFileArtifact = async (token, { title, data }) => {
+  const addFileArtifact = async ({ title, data }) => {
     const url = `/api/artifacts/${userId}`;
     fetch(url, {
       method: vaultRequests.POST,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
 
       },
       body: JSON.stringify({
@@ -261,13 +265,10 @@ const useArtifacts = (userId, searchValue, tagList) => {
     }
     setArtifacts(prev => prev.filter(item => item.id !== artifactId));
 
-    const token = await getFreshToken();
-    if (!token) return;
     try {
       const url = `/api/artifacts/${userId}/${artifactId}`;
       await vaultRequest({
         method: vaultRequests.DELETE,
-        headers: { Authorization: `Bearer ${token}` },
         path: url,
       });
     } catch (err) {
@@ -298,15 +299,11 @@ const useArtifacts = (userId, searchValue, tagList) => {
       )
     );
 
-    const token = await getFreshToken();
-    if (!token) return;
-
     try {
       const url = `/api/artifacts/text/${userId}/${artifactId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.PATCH,
-        headers: { Authorization: `Bearer ${token}` },
         path: url,
         payload: {
           "title": title,
@@ -341,36 +338,12 @@ const useArtifacts = (userId, searchValue, tagList) => {
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const screenHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const currentHeight = window.scrollY + screenHeight;
-
-      if (
-        documentHeight > screenHeight &&
-        currentHeight >= documentHeight * 0.99 &&
-        hasMoreArtifacts &&
-        !cooldown
-      ) {
-        setCooldown(true);
-        fetchArtifactsData();
-
-        setTimeout(() => {
-          setCooldown(false);
-        }, 100);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [fetchArtifactsData, cooldown, hasMoreArtifacts]);
 
   useEffect(() => {
     if (error) setError(null);
   }, [error]);
 
-  return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact };
+  return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact, hasMoreArtifacts };
 };
 export default useArtifacts;
 

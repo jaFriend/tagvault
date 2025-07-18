@@ -12,12 +12,14 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.artifactHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0px;
+/*
+* Add Later
+* For "enlarging" effect to later open a specific artifact
+.artifactCard:hover {
+  transform: scale(1.03);
 }
+*/
+
 
 .headerRow {
   display: flex;

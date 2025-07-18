@@ -75,24 +75,7 @@ const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tag
 
   return (
     <div className={styles.artifactCard}>
-      <div className={styles.cardActions}>
-        {!isEditing && (
-          <button
-            className={`${styles.actionButton} ${styles.editButton}`}
-            onClick={handleEditClick}
-            aria-label="Edit file artifact"
-          >
-            Edit
-          </button>
-        )}
-        {onRemove && (
-          <button className={`${styles.actionButton} ${styles.removeButton}`} onClick={onRemove} aria-label="Remove artifact">
-            &times;
-          </button>
-        )}
-      </div>
-
-      <div className={styles.artifactHeader}>
+      <div className={styles.headerRow}>
         {isEditing ? (
           <input
             type="text"
@@ -107,6 +90,24 @@ const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tag
             <h3 className={styles.title}>{title}</h3>
           )
         )}
+        <div className={styles.cardActions}>
+          {!isEditing && (
+            <button
+              className={`${styles.actionButton} ${styles.editButton}`}
+              onClick={handleEditClick}
+              aria-label="Edit file artifact"
+            >
+              Edit
+            </button>
+          )}
+          {onRemove && (
+            <button className={`${styles.actionButton} ${styles.removeButton}`} onClick={onRemove} aria-label="Remove artifact">
+              &times;
+            </button>
+          )}
+        </div>
+
+
       </div>
 
       {isEditing ? (

@@ -15,9 +15,15 @@
 }
 
 .artifactGrid {
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 390px;
+  width: 100%;
+  background-color: #A4ACAD;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 15px;
 }
 
@@ -28,6 +34,9 @@
   gap: 15px;
 }
 
+.boldText {
+  margin: 10px;
+}
 
 .uploadButton {
   padding: 10px 20px;

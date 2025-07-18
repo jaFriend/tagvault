@@ -1,17 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import vaultRequest, { vaultRequests } from '../services/requests';
-import useToken from './useToken.jsx';
 
 const useTags = (userId) => {
   const [tags, setTags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { getFreshToken } = useToken();
-
   const fetchTagsData = useCallback(async () => {
-    const token = await getFreshToken();
-    if (!token) return;
 
     setIsLoading(true);
     try {
@@ -19,7 +14,6 @@ const useTags = (userId) => {
       const res = await vaultRequest({
         method: vaultRequests.GET,
         path: url,
-        headers: { Authorization: `Bearer ${token}` }
       });
       const json = res.data;
       setTags(json?.data?.tags?.map(tag => ({
@@ -31,7 +25,7 @@ const useTags = (userId) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, getFreshToken]);
+  }, [userId]);
 
   useEffect(() => {
     fetchTagsData();
@@ -59,15 +53,11 @@ const useTags = (userId) => {
     };
     setTags(prevTags => insertTagSorted(prevTags, tempTag));
 
-    const token = await getFreshToken();
-    if (!token) return;
-
     try {
       const url = "/api/tags/" + userId;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
-        headers: { Authorization: `Bearer ${token}` },
         payload: { tagName: title }
       });
       const tagUpload = res.data;
@@ -89,15 +79,11 @@ const useTags = (userId) => {
     const originalTag = index !== -1 ? tags[index] : undefined;
     setTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
 
-    const token = await getFreshToken();
-    if (!token) return;
-
     try {
       const url = "/api/tags/" + userId + "/" + tagId;
       await vaultRequest({
         method: vaultRequests.DELETE,
         path: url,
-        headers: { Authorization: `Bearer ${token}` },
       });
     } catch (err) {
       setTags(prevTags => {
