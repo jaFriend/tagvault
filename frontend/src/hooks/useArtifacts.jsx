@@ -22,18 +22,7 @@ const formatFileArtifact = (artifact) => ({
 });
 
 const useArtifacts = (searchValue, tagList) => {
-  const [artifacts, setArtifacts] = useState([
-    {
-      id: "123413-551",
-      title: "Test",
-      filename: "coolage.txt",
-      fileURL: "https://example.com/",
-      fileSize: 1024 * 1024 * 1024,
-      inputType: "FILE",
-      tags: [],
-      isImage: false
-    }
-  ]);
+  const [artifacts, setArtifacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasMoreArtifacts, setHasMoreArtifacts] = useState(false);
@@ -65,9 +54,10 @@ const useArtifacts = (searchValue, tagList) => {
       nextCursorRef.current = json.data.nextCursor;
       setHasMoreArtifacts(json.data.hasMoreArtifacts);
       if (isNewSearch) setArtifacts([]);
-      setArtifacts(prev =>
-        [...prev, ...fetchedArtifacts.map(formatTextArtifact)]
-      );
+      setArtifacts(prev => [
+        ...prev,
+        ...fetchedArtifacts.map(a => a.fileType === "TEXT" ? formatTextArtifact(a) : formatFileArtifact(a))
+      ]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -224,40 +214,82 @@ const useArtifacts = (searchValue, tagList) => {
     }
   }
 
-  // TODO: Implement this function later,
-  // everything in this function is incomplete and needs changing
-  const addFileArtifact = async ({ title, data }) => {
-    const url = `/api/artifacts/`;
-    fetch(url, {
-      method: vaultRequests.POST,
-      headers: {
-        "Content-Type": "application/json",
+  const addFileArtifact = async ({ title, file }) => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const tempArtifact = {
+      id: tempId,
+      title,
+      filename: file.name,
+      fileURL: null,
+      fileSize: file.size,
+      inputType: "FILE",
+      tags: [],
+      isImage: file.type.startsWith("image/")
+    };
+    setArtifacts(prevItems => [tempArtifact, ...prevItems]);
 
-      },
-      body: JSON.stringify({
-        "title": title,
-        "data": data,
-        "fileType": "FILE"
-      })
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Unable to upload tag");
-        }
-        return res.json()
-      })
-      .then(artifactUpload => {
-        setArtifacts(prevItems => [...prevItems, {
-          id: artifactUpload.data.id,
-          title: artifactUpload.data.title,
-          filename: artifactUpload.data.fileName,
-          fileURL: artifactUpload.data.fileUrl,
-          inputType: artifactUpload.data.fileType,
-          tags: artifactUpload.data.tags || [],
-          isImage: artifactUpload.data.isImage
-        }]);
+    try {
+      const sasTokenRes = await vaultRequest({
+        method: vaultRequests.POST,
+        path: '/api/sas-generate/upload',
+        payload: {
+          "filename": file.name,
+        },
       });
-  }
+
+      const sasToken = sasTokenRes.data.data;
+      const uploadRes = await fetch(sasToken.url_sas, {
+        method: 'PUT',
+        headers: {
+          'x-ms-version': '2024-11-04',
+          'x-ms-blob-type': 'BlockBlob',
+          'Content-Type': file.type || 'application/octet-stream'
+        },
+        body: file
+      });
+
+
+      if (!uploadRes.ok) {
+        throw new Error('Azure upload failed');
+      }
+
+      const url = `/api/artifacts/`;
+      const res = await vaultRequest({
+        method: vaultRequests.POST,
+        path: url,
+        payload: {
+          "title": title,
+          "filename": file.name,
+          "fileUrl": sasToken.url,
+          "fileSize": file.size,
+          "isImage": file.type.startsWith("image/"),
+          "fileType": "FILE"
+        },
+      });
+
+
+
+      const json = res.data;
+      console.log(json);
+
+      setArtifacts(prevItems => [
+        {
+          id: json.data.id,
+          title: json.data.title,
+          filename: json.data.fileName,
+          fileURL: json.data.fileUrl || "",
+          fileSize: json.data.fileSize,
+          inputType: json.data.fileType,
+          tags: json.data.tags || [],
+          isImage: json.data.isImage
+        },
+        ...prevItems.slice(1)
+      ]);
+    } catch (err) {
+      setArtifacts(prevItems => prevItems.slice(1));
+      setError(err.message);
+    }
+  };
 
   const removeArtifact = async (artifactId) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
