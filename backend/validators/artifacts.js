@@ -1,6 +1,5 @@
 import { body, param, query } from 'express-validator';
-
-const artifactValidator = [
+const baseArtifactValidator = [
   body('fileType')
     .exists({ checkFalsy: true }).withMessage("fileType is required.")
     .isIn(["TEXT", "FILE"]).withMessage("fileType must be 'TEXT' or 'FILE'."),
@@ -9,27 +8,47 @@ const artifactValidator = [
     .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 255 }).withMessage("Title must be at most 255 characters."),
-
+];
+const validateTextArtifact = [
   body('textContent')
-    .if(body('fileType').equals("TEXT"))
     .exists({ checkFalsy: true }).withMessage("Missing text content for TEXT artifact.")
     .isString().withMessage("Text content must be a string."),
+];
 
+const validateFileArtifact = [
   body('fileUrl')
-    .if(body('fileType').equals("FILE"))
-    .exists({ checkFalsy: true }).withMessage("Missing file URL for FILE artifact.")
-    .isURL().withMessage("fileUrl must be a valid URL."),
-
-  body('fileName')
-    .if(body('fileType').equals("FILE"))
+    .custom(value => {
+      // Allow null, undefined, empty string, or valid URL
+      if (value === null || value === undefined || value === '') {
+        return true;
+      }
+      try {
+        new URL(value);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .withMessage('fileUrl must be a valid URL if provided.'),
+  body('filename')
     .exists({ checkFalsy: true }).withMessage("Missing file name for FILE artifact.")
     .isLength({ min: 1 }).withMessage("fileName must be a non-empty string."),
-
   body('fileSize')
-    .if(body('fileType').equals("FILE"))
     .exists({ checkFalsy: true }).withMessage("Missing file size for FILE artifact.")
     .isNumeric().withMessage("fileSize must be a number."),
 ];
+
+const conditionalValidator = async (req, res, next) => {
+  const type = req.body.fileType;
+
+  if (type === 'TEXT') {
+    await Promise.all(validateTextArtifact.map(validation => validation.run(req)));
+  } else if (type === 'FILE') {
+    await Promise.all(validateFileArtifact.map(validation => validation.run(req)));
+  }
+
+  next();
+};
 
 const getArtifactsValidator = [
   query('searchValue')
@@ -57,4 +76,4 @@ const getArtifactsValidator = [
 ];
 
 
-export { artifactValidator, getArtifactsValidator }
+export { baseArtifactValidator, conditionalValidator, getArtifactsValidator }

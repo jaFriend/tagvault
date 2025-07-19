@@ -19,6 +19,9 @@ async function createArtifact(id, title, textContent, fileName, fileUrl, fileSiz
 async function createTextArtifact(id, title, textContent) {
   return createArtifact(id, title, textContent, null, null, null, "TEXT", false);
 }
+async function createFileArtifact(id, title, fileName, fileURL, fileSize, isImage) {
+  return createArtifact(id, title, null, fileName, fileURL, fileSize, "FILE", isImage);
+}
 
 async function getArtifacts(userId, searchValue, tags, limit, cursor) {
   const whereMethod = { userId: userId };
@@ -209,6 +212,7 @@ async function updateArtifact(userId, artifactId, title, textContent) {
 export {
   createArtifact,
   createTextArtifact,
+  createFileArtifact,
   getArtifacts,
   deleteArtifact,
   addTagToArtifact,

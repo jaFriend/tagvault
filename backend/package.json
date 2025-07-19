@@ -12,6 +12,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@azure/identity": "^4.10.2",
+    "@azure/storage-blob": "^12.27.0",
     "@prisma/client": "^6.8.2",
     "cookies": "^0.9.1",
     "cors": "^2.8.5",

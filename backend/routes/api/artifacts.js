@@ -3,7 +3,7 @@ import { validationResult, matchedData } from 'express-validator';
 
 const router = Router();
 import * as ArtifactController from '../../controllers/artifacts.js'
-import { artifactValidator, getArtifactsValidator } from '../../validators/artifacts.js'
+import { baseArtifactValidator, conditionalValidator, getArtifactsValidator } from '../../validators/artifacts.js'
 import ClerkJWTAuth from '../../validators/jwtauth.js';
 
 router.get('/', getArtifactsValidator, ClerkJWTAuth, async (request, response) => {
@@ -41,21 +41,27 @@ router.get('/', getArtifactsValidator, ClerkJWTAuth, async (request, response) =
 });
 
 
-router.post('/', artifactValidator, ClerkJWTAuth, async (request, response) => {
+router.post('/', baseArtifactValidator, conditionalValidator, ClerkJWTAuth, async (request, response) => {
   const errors = validationResult(request)
   if (!errors.isEmpty()) {
+    console.log(errors)
     return response.status(400).json({
       status: "error",
       message: "Invalid request paramteres."
     });
   }
 
-
   try {
     if (request.body.fileType === "TEXT") {
       response.status(200).json({
         status: "success",
         data: await ArtifactController.createTextArtifact(request.user, request.body.title, request.body.textContent)
+      });
+    } else if (request.body.fileType === "FILE") {
+      const body = request.body;
+      response.status(200).json({
+        status: "success",
+        data: await ArtifactController.createFileArtifact(request.user, body.title, body.filename, body.fileUrl, body.fileSize, body.isImage)
       });
     } else {
       response.status(500).json({
@@ -70,6 +76,7 @@ router.post('/', artifactValidator, ClerkJWTAuth, async (request, response) => {
     })
   }
 });
+
 router.delete('/:tagId', ClerkJWTAuth, async (request, response) => {
   try {
     const deletedArtifact = await ArtifactController.deleteArtifact(request.user, request.params.tagId);
