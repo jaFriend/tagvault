@@ -68,12 +68,40 @@ async function getArtifacts(userId, searchValue, tags, limit, cursor) {
 
 
 async function deleteArtifact(userId, artifactId) {
-  return prisma.artifact.delete({
-    where: {
-      userId: userId,
-      id: artifactId
+  const artifactWithTags = await prisma.artifact.findUnique({
+    where: { id: artifactId },
+    select: {
+      tags: {
+        select: { id: true }
+      }
     }
-  })
+  });
+
+  const tagIds = artifactWithTags.tags.map(tag => tag.id);
+  const artifact = await prisma.artifact.delete({
+    where: {
+      id: artifactId,
+      userId: userId
+    }
+  });
+
+  for (const tagId of tagIds) {
+    const tagWithArtifacts = await prisma.tag.findUnique({
+      where: { id: tagId },
+      select: {
+        artifacts: {
+          select: { id: true }
+        }
+      }
+    });
+
+    if (tagWithArtifacts && tagWithArtifacts.artifacts.length === 0) {
+      await prisma.tag.delete({
+        where: { id: tagId }
+      });
+    }
+  }
+  return artifact;
 }
 
 async function addTagToArtifact(userId, artifactId, tagName) {

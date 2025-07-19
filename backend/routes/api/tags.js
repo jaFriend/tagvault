@@ -4,9 +4,9 @@ const router = Router();
 import * as TagController from '../../controllers/tags.js'
 import ClerkJWTAuth from '../../validators/jwtauth.js';
 
-router.post('/:userId', ClerkJWTAuth, async (request, response) => {
+router.post('/', ClerkJWTAuth, async (request, response) => {
   try {
-    const newTag = await TagController.createTag(request.params.userId, request.body.tagName);
+    const newTag = await TagController.createTag(request.user, request.body.tagName);
     response.status(200).json({
       status: "success",
       data: newTag
@@ -20,9 +20,9 @@ router.post('/:userId', ClerkJWTAuth, async (request, response) => {
   }
 });
 
-router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
+router.delete('/:tagId', ClerkJWTAuth, async (request, response) => {
   try {
-    const deletedTag = await TagController.deleteTag(request.params.userId, request.params.tagId);
+    const deletedTag = await TagController.deleteTag(request.user, request.params.tagId);
     response.status(200).json({
       status: "success",
       data: deletedTag
@@ -36,9 +36,9 @@ router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
   }
 });
 
-router.get('/:userId', ClerkJWTAuth, async (request, response) => {
+router.get('/', ClerkJWTAuth, async (request, response) => {
   try {
-    const tagList = await TagController.getTags(request.params.userId);
+    const tagList = await TagController.getTags(request.user);
     response.status(200).json({
       status: "success",
       data: {

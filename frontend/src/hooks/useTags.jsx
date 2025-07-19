@@ -1,31 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import vaultRequest, { vaultRequests } from '../services/requests';
 
-const useTags = (userId) => {
+const useTags = () => {
   const [tags, setTags] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchTagsData = useCallback(async () => {
 
-    setIsLoading(true);
     try {
-      const url = `/api/tags/${userId}`;
+      const url = `/api/tags/`;
       const res = await vaultRequest({
         method: vaultRequests.GET,
         path: url,
       });
       const json = res.data;
-      setTags(json?.data?.tags?.map(tag => ({
+      const newTags = json?.data?.tags?.map(tag => ({
         id: tag.id,
         name: tag.name
-      })));
+      }));
+
+      setTags(newTags);
+
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     fetchTagsData();
@@ -54,7 +56,7 @@ const useTags = (userId) => {
     setTags(prevTags => insertTagSorted(prevTags, tempTag));
 
     try {
-      const url = "/api/tags/" + userId;
+      const url = "/api/tags/";
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -80,7 +82,7 @@ const useTags = (userId) => {
     setTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
 
     try {
-      const url = "/api/tags/" + userId + "/" + tagId;
+      const url = "/api/tags/" + tagId;
       await vaultRequest({
         method: vaultRequests.DELETE,
         path: url,

@@ -32,10 +32,6 @@ const artifactValidator = [
 ];
 
 const getArtifactsValidator = [
-  param('userId')
-    .trim()
-    .notEmpty().withMessage('userId is required')
-    .isString().withMessage('userId must be a string'),
   query('searchValue')
     .default('')
     .isString().withMessage('searchValue must be a string'),

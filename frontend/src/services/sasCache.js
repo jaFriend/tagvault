@@ -4,11 +4,12 @@ const saveCache = (cache) => { sessionStorage.setItem(KEY, JSON.stringify(cache)
 const sasCache = {
   get(filename) {
     const cache = loadCache();
-    const item = cache[item];
+    const item = cache[filename];
+    console.log(item);
     if (!item) return null;
     const now = Date.now();
 
-    if (item.expires < now + 60 * 1000) {
+    if (item.expires <= now) {
       delete cache[filename];
       saveCache(cache);
       return null;
@@ -22,5 +23,4 @@ const sasCache = {
   },
   clear() { sessionStorage.removeItem(KEY); },
 }
-
 export default sasCache;

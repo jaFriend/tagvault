@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styles from './MainUserPage.module.css';
-import { useUser } from '@clerk/clerk-react'
 import SearchInput from '../SearchInput';
 import UploadModal from '../modal/UploadModal';
 import TagUploadModal from '../modal/TagUploadModal';
@@ -11,7 +10,6 @@ import useTags from '../../hooks/useTags';
 import ErrorBanner from '../ErrorBanner/ErrorBanner';
 
 const MainUserPage = () => {
-  const { user } = useUser();
   const [error, setError] = useState(null);
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
@@ -24,7 +22,7 @@ const MainUserPage = () => {
     addTag,
     removeTag,
     fetchTagsData
-  } = useTags(user.id);
+  } = useTags();
   const {
     artifacts,
     isLoading: isLoadingArtifacts,
@@ -36,7 +34,7 @@ const MainUserPage = () => {
     fetchArtifactsData,
     editArtifact,
     hasMoreArtifacts
-  } = useArtifacts(user.id, searchValue, selectedTagIds);
+  } = useArtifacts(searchValue, selectedTagIds);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
   const handleFileModalOpen = () => { setIsFileModalOpen(true); };
@@ -60,6 +58,12 @@ const MainUserPage = () => {
     fetchTagsData();
   }, [onRemoveTag, fetchTagsData]);
 
+  const fetchTagsDataOnRemoveArtifact = useCallback(async (artifactId) => {
+    await removeArtifact(artifactId);
+    fetchTagsData();
+
+  }, [fetchTagsData, removeArtifact]);
+
   const fetchArtifactsOnRemoveTag = async (tagId) => {
     addRemoveSelectedTag(tagId, false);
     await removeTag(tagId);
@@ -69,6 +73,7 @@ const MainUserPage = () => {
   const searchSubmit = (value) => {
     setSearchValue(value);
   }
+
 
   const addRemoveSelectedTag = (id, next) => {
     if (next)
@@ -122,7 +127,7 @@ const MainUserPage = () => {
             <ArtifactList
               artifacts={artifacts}
               fetchArtifactsData={fetchArtifactsData}
-              onRemoveArtifact={removeArtifact}
+              onRemoveArtifact={fetchTagsDataOnRemoveArtifact}
               onAddTag={fetchTagsDataOnAddTag}
               onRemoveTag={fetchTagsDataOnRemoveTag}
               onEditArtifact={editArtifact}

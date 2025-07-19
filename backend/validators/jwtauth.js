@@ -1,9 +1,19 @@
+import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import Cookies from 'cookies';
 import jwt from 'jsonwebtoken';
 
-const ClerkJWTAuth = (req, res, next) => {
-  const publicKey = process.env.CLERK_PEM_PUBLIC_KEY;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pubKeyPath = path.join(__dirname, '../config/clerk_key.pem');
+const loadPublicKey = async () => {
+  const pubKey = await readFile(pubKeyPath, 'utf-8');
+  return pubKey;
+};
+const publicKey = await loadPublicKey();
 
+const ClerkJWTAuth = (req, res, next) => {
   if (!publicKey) {
     console.error('Error: CLERK_PEM_PUBLIC_KEY is not defined in environment variables.');
     return res.status(500).json({ error: 'Server configuration error: Public key missing.' });
@@ -42,11 +52,8 @@ const ClerkJWTAuth = (req, res, next) => {
       return res.status(403).json({ error: "Forbidden: Token's authorized party is not permitted." });
     }
 
-    req.user = decoded;
+    req.user = decoded.userId;
 
-    if (decoded.userId != req.params.userId) {
-      return res.status(401).json({ error: 'Authentication failed: Invalid User ID' });
-    }
     next();
 
   } catch (error) {

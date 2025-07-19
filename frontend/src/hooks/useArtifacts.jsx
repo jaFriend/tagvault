@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import vaultRequest, { vaultRequests } from '../services/requests';
+import sasCache from '../services/sasCache';
 
 const formatTextArtifact = (artifact) => ({
   id: artifact.id,
@@ -14,19 +15,20 @@ const formatFileArtifact = (artifact) => ({
   title: artifact.title,
   filename: artifact.fileName,
   fileURL: artifact.fileUrl,
+  fileSize: artifact.fileSize,
   inputType: artifact.fileType,
   tags: artifact.tags || [],
   isImage: artifact.isImage
 });
 
-
-const useArtifacts = (userId, searchValue, tagList) => {
+const useArtifacts = (searchValue, tagList) => {
   const [artifacts, setArtifacts] = useState([
     {
       id: "123413-551",
       title: "Test",
       filename: "coolage.txt",
       fileURL: "https://example.com/",
+      fileSize: 1024 * 1024 * 1024,
       inputType: "FILE",
       tags: [],
       isImage: false
@@ -44,7 +46,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
     isFetchingRef.current = true;
 
     try {
-      const base = `/api/artifacts/${userId}`;
+      const base = '/api/artifacts/';
       const query = new URLSearchParams({ searchValue });
       query.append('tags', '');
       tagList.forEach(tag => query.append('tags', tag));
@@ -72,7 +74,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
-  }, [userId, searchValue, tagList]);
+  }, [searchValue, tagList]);
 
   useEffect(() => {
     if (!initialFetch) {
@@ -101,7 +103,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
 
 
     try {
-      const url = `/api/artifacts/${userId}/${artifactId}/tags/${tagId}`;
+      const url = `/api/artifacts/${artifactId}/tags/${tagId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.DELETE,
@@ -146,7 +148,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
     );
 
     try {
-      const url = `/api/artifacts/${userId}/${artifactId}/tags`;
+      const url = `/api/artifacts/${artifactId}/tags`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -194,7 +196,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
     }
     setArtifacts(prevItems => [tempArtifact, ...prevItems]);
     try {
-      const url = `/api/artifacts/${userId}`;
+      const url = `/api/artifacts/`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -225,7 +227,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
   // TODO: Implement this function later,
   // everything in this function is incomplete and needs changing
   const addFileArtifact = async ({ title, data }) => {
-    const url = `/api/artifacts/${userId}`;
+    const url = `/api/artifacts/`;
     fetch(url, {
       method: vaultRequests.POST,
       headers: {
@@ -266,7 +268,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
     setArtifacts(prev => prev.filter(item => item.id !== artifactId));
 
     try {
-      const url = `/api/artifacts/${userId}/${artifactId}`;
+      const url = `/api/artifacts/${artifactId}`;
       await vaultRequest({
         method: vaultRequests.DELETE,
         path: url,
@@ -300,7 +302,7 @@ const useArtifacts = (userId, searchValue, tagList) => {
     );
 
     try {
-      const url = `/api/artifacts/text/${userId}/${artifactId}`;
+      const url = `/api/artifacts/text/${artifactId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.PATCH,

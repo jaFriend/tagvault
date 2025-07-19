@@ -8,8 +8,7 @@ yarn-error.log
 .yarn/cache/
 .yarn/install-state.gz
 .env.*
-
-backend/prisma/migrations
+/backend/config/clerk_key.pem
 
 # Logs
 logs

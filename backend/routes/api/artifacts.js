@@ -6,7 +6,7 @@ import * as ArtifactController from '../../controllers/artifacts.js'
 import { artifactValidator, getArtifactsValidator } from '../../validators/artifacts.js'
 import ClerkJWTAuth from '../../validators/jwtauth.js';
 
-router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, response) => {
+router.get('/', getArtifactsValidator, ClerkJWTAuth, async (request, response) => {
   const errors = validationResult(request)
   if (!errors.isEmpty()) {
     return response.status(400).json({
@@ -18,7 +18,7 @@ router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, resp
   const data = matchedData(request, { locations: ['query', 'params'] });
 
   try {
-    const artifacts = await ArtifactController.getArtifacts(data.userId, data.searchValue, data.tags, data.limit, data.cursor);
+    const artifacts = await ArtifactController.getArtifacts(request.user, data.searchValue, data.tags, data.limit, data.cursor);
     const hasMoreArtifacts = artifacts.length === data.limit + 1;
     if (hasMoreArtifacts) artifacts.pop();
     const lastArtifact = artifacts[artifacts.length - 1];
@@ -41,7 +41,7 @@ router.get('/:userId', getArtifactsValidator, ClerkJWTAuth, async (request, resp
 });
 
 
-router.post('/:userId', artifactValidator, ClerkJWTAuth, async (request, response) => {
+router.post('/', artifactValidator, ClerkJWTAuth, async (request, response) => {
   const errors = validationResult(request)
   if (!errors.isEmpty()) {
     return response.status(400).json({
@@ -55,7 +55,7 @@ router.post('/:userId', artifactValidator, ClerkJWTAuth, async (request, respons
     if (request.body.fileType === "TEXT") {
       response.status(200).json({
         status: "success",
-        data: await ArtifactController.createTextArtifact(request.params.userId, request.body.title, request.body.textContent)
+        data: await ArtifactController.createTextArtifact(request.user, request.body.title, request.body.textContent)
       });
     } else {
       response.status(500).json({
@@ -70,9 +70,9 @@ router.post('/:userId', artifactValidator, ClerkJWTAuth, async (request, respons
     })
   }
 });
-router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
+router.delete('/:tagId', ClerkJWTAuth, async (request, response) => {
   try {
-    const deletedArtifact = await ArtifactController.deleteArtifact(request.params.userId, request.params.tagId);
+    const deletedArtifact = await ArtifactController.deleteArtifact(request.user, request.params.tagId);
     response.status(200).json({
       status: "success",
       data: deletedArtifact
@@ -86,14 +86,14 @@ router.delete('/:userId/:tagId', ClerkJWTAuth, async (request, response) => {
   }
 });
 
-router.post('/:userId/:artifactId/tags', ClerkJWTAuth, async (request, response) => {
+router.post('/:artifactId/tags', ClerkJWTAuth, async (request, response) => {
   try {
-    const { userId, artifactId } = request.params;
+    const { artifactId } = request.params;
     const tagName = request.body.tagName;
 
     response.status(200).json({
       status: "success",
-      data: await ArtifactController.addTagToArtifact(userId, artifactId, tagName)
+      data: await ArtifactController.addTagToArtifact(request.user, artifactId, tagName)
     });
 
   } catch (err) {
@@ -104,13 +104,13 @@ router.post('/:userId/:artifactId/tags', ClerkJWTAuth, async (request, response)
   }
 });
 
-router.delete('/:userId/:artifactId/tags/:tagId', ClerkJWTAuth, async (request, response) => {
+router.delete('/:artifactId/tags/:tagId', ClerkJWTAuth, async (request, response) => {
   try {
-    const { userId, artifactId, tagId } = request.params;
+    const { artifactId, tagId } = request.params;
 
     response.status(200).json({
       status: "success",
-      data: await ArtifactController.removeTagFromArtifact(userId, artifactId, tagId)
+      data: await ArtifactController.removeTagFromArtifact(request.user, artifactId, tagId)
     });
 
   } catch (err) {
@@ -121,13 +121,13 @@ router.delete('/:userId/:artifactId/tags/:tagId', ClerkJWTAuth, async (request, 
   }
 });
 
-router.patch('/text/:userId/:artifactId', ClerkJWTAuth, async (request, response) => {
+router.patch('/text/:artifactId', ClerkJWTAuth, async (request, response) => {
   try {
-    const { userId, artifactId } = request.params;
+    const { artifactId } = request.params;
 
     response.status(200).json({
       status: "success",
-      data: await ArtifactController.updateArtifact(userId, artifactId, request.body.title, request.body.textContent)
+      data: await ArtifactController.updateArtifact(request.user, artifactId, request.body.title, request.body.textContent)
     });
 
   } catch (err) {
