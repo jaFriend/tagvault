@@ -11,9 +11,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (reques
       message: "Webhook signature cannot be verified.",
     });
   }
+
   const rawBody = request.body;
   const signature = request.header('Clerk-Signature');
-
   if (!signature) {
     return res.status(400).json({ status: "error", message: "Missing Clerk-Signature header" });
   }
@@ -22,7 +22,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (reques
     .createHmac('sha256', CLERK_WEBHOOK_SECRET)
     .update(rawBody)
     .digest('hex');
-
   const valid = crypto.timingSafeEqual(
     Buffer.from(expectedSignature),
     Buffer.from(signature)
@@ -31,8 +30,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (reques
   if (!valid) {
     return res.status(403).json({ status: "error", message: "Invalid signature" });
   }
-
   let event;
+
   try {
     event = JSON.parse(rawBody.toString('utf-8'));
   } catch (err) {
