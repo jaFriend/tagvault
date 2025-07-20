@@ -1,4 +1,5 @@
 import prisma from '../prisma/prisma.js';
+import { deleteFile } from './sasToken.js';
 
 async function createArtifact(id, title, textContent, fileName, fileUrl, fileSize, fileType, isImage) {
   return prisma.artifact.create({
@@ -80,6 +81,7 @@ async function deleteArtifact(userId, artifactId) {
     }
   });
 
+
   const tagIds = artifactWithTags.tags.map(tag => tag.id);
   const artifact = await prisma.artifact.delete({
     where: {
@@ -87,6 +89,8 @@ async function deleteArtifact(userId, artifactId) {
       userId: userId
     }
   });
+
+  if (artifact.fileType === "FILE") deleteFile(userId, artifact.fileName);
 
   for (const tagId of tagIds) {
     const tagWithArtifacts = await prisma.tag.findUnique({

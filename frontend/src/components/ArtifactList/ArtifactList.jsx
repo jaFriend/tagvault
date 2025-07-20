@@ -6,7 +6,7 @@ import ArtifactFileItem from '../ArtifactFileItem';
 
 
 
-const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEditArtifact, fetchArtifactsData, hasMoreItems }) => {
+const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEditArtifact, fetchArtifactsData, hasMoreItems, downloadFileArtifact }) => {
   const [itemsPerRow, setItemsPerRow] = useState(3);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -83,6 +83,7 @@ const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEd
                 onAddTag={onAddTag}
                 onRemoveTag={onRemoveTag}
                 onEditArtifact={onEditArtifact}
+                downloadFileArtifact={downloadFileArtifact}
               />
             );
           }

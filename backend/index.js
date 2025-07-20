@@ -14,10 +14,10 @@ app.use(cors({
   origin: permitted_origin
 }));
 
-app.use('/api/users', users);
-app.use('/api/artifacts', artifacts);
-app.use('/api/tags', tags);
-app.use('/api/sas-generate', sasToken);
+app.use('/users', users);
+app.use('/artifacts', artifacts);
+app.use('/tags', tags);
+app.use('/sas-generate', sasToken);
 
 
 app.listen(PORT, () => {
