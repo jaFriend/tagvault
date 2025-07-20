@@ -43,6 +43,7 @@ jobs:
           ###### End of Repository/Build Configurations ######
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ${{secrets.VITE_CLERK_PUBLISHABLE_KEY}}
+          VITE_SERVER_URL: ${{secrets.VITE_SERVER_URL}}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
