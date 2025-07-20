@@ -230,8 +230,42 @@
   flex-shrink: 0;
 }
 
+.downloadButton {
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.downloadButton:hover {
+  background-color: #005a9e;
+}
+
+.downloadButton:focus {
+  outline: 2px solid #005a9e;
+  outline-offset: 2px;
+}
+
+.downloadButton:active {
+  background-color: #004577;
+}
 
 .addTagButton:hover {
-  background-color: var(--color-dark-blue-gray);
-  color: var(--color-lightest-gray);
+  background-color: #555;
+}
+
+.newTagInput {
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  outline: none;
+  flex-shrink: 0;
+  width: 100px;
+  margin-left: 5px;
 }

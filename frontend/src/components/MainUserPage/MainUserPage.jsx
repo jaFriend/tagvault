@@ -33,7 +33,8 @@ const MainUserPage = () => {
     onAddTag,
     fetchArtifactsData,
     editArtifact,
-    hasMoreArtifacts
+    hasMoreArtifacts,
+    downloadFileArtifact
   } = useArtifacts(searchValue, selectedTagIds);
   const handleTagModalOpen = () => { setIsTagModalOpen(true); };
   const handleTagModalClose = () => { setIsTagModalOpen(false); };
@@ -132,6 +133,7 @@ const MainUserPage = () => {
               onRemoveTag={fetchTagsDataOnRemoveTag}
               onEditArtifact={editArtifact}
               hasMoreItems={hasMoreArtifacts}
+              downloadFileArtifact={downloadFileArtifact}
             />
           </div>
         )}

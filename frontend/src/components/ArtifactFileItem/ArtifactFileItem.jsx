@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import styles from './ArtifactFileItem.module.css';
 import TagItem from '../TagItem';
 
-const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tags, onAddTag, onRemoveTag, onEditArtifact }) => {
+const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tags, onAddTag, onRemoveTag, onEditArtifact, downloadFileArtifact }) => {
   const [showAddTagInput, setShowAddTagInput] = useState(false);
   const [newTagValue, setNewTagValue] = useState('');
   const tagsScrollContainerRef = useRef(null);
@@ -92,13 +92,22 @@ const ArtifactFileItem = ({ artifactId, title, filename, fileSize, onRemove, tag
         )}
         <div className={styles.cardActions}>
           {!isEditing && (
-            <button
-              className={`${styles.actionButton} ${styles.editButton}`}
-              onClick={handleEditClick}
-              aria-label="Edit file artifact"
-            >
-              Edit
-            </button>
+            <>
+              <button
+                className={`${styles.actionButton} ${styles.downloadButton}`}
+                onClick={() => downloadFileArtifact(filename)}
+                aria-label="Download file artifact"
+              >
+                Download
+              </button>
+              <button
+                className={`${styles.actionButton} ${styles.editButton}`}
+                onClick={handleEditClick}
+                aria-label="Edit file artifact"
+              >
+                Edit
+              </button>
+            </>
           )}
           {onRemove && (
             <button className={`${styles.actionButton} ${styles.removeButton}`} onClick={onRemove} aria-label="Remove artifact">

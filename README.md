@@ -34,10 +34,21 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 VITE_SERVER_URL=http://localhost:5050
 ```
 ###### Backend
+
+AZURE env isn't needed if you don't care about files.
+As of now, azure blob is needed if you want to store files.
+- will change later
 ```env
 DATABASE_URL=postgresql://<username>:<password>@<host>:<port>/<database_name>
 PERMITTED_ORIGIN=http://localhost:5173
-CLERK_PEM_FILE=name
+CLERK_WEBHOOK_SECRET=''
+CLERK_PEM_FILE=<name>
+AZURE_TENANT_ID=
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_SUBSCRIPTION_ID=
+AZURE_STORAGE_ACCOUNT_NAME=
+AZURE_STORAGE_CONTAINER_NAME=
 ```
 #### backend/config/CLERK_PEM_FILE
 ```sh

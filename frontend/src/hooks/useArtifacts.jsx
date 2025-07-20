@@ -35,7 +35,7 @@ const useArtifacts = (searchValue, tagList) => {
     isFetchingRef.current = true;
 
     try {
-      const base = '/api/artifacts/';
+      const base = '/artifacts/';
       const query = new URLSearchParams({ searchValue });
       query.append('tags', '');
       tagList.forEach(tag => query.append('tags', tag));
@@ -93,7 +93,7 @@ const useArtifacts = (searchValue, tagList) => {
 
 
     try {
-      const url = `/api/artifacts/${artifactId}/tags/${tagId}`;
+      const url = `/artifacts/${artifactId}/tags/${tagId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.DELETE,
@@ -138,7 +138,7 @@ const useArtifacts = (searchValue, tagList) => {
     );
 
     try {
-      const url = `/api/artifacts/${artifactId}/tags`;
+      const url = `/artifacts/${artifactId}/tags`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -186,7 +186,7 @@ const useArtifacts = (searchValue, tagList) => {
     }
     setArtifacts(prevItems => [tempArtifact, ...prevItems]);
     try {
-      const url = `/api/artifacts/`;
+      const url = `/artifacts/`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -231,7 +231,7 @@ const useArtifacts = (searchValue, tagList) => {
     try {
       const sasTokenRes = await vaultRequest({
         method: vaultRequests.POST,
-        path: '/api/sas-generate/upload',
+        path: '/sas-generate/upload',
         payload: {
           "filename": file.name,
         },
@@ -253,7 +253,7 @@ const useArtifacts = (searchValue, tagList) => {
         throw new Error('Azure upload failed');
       }
 
-      const url = `/api/artifacts/`;
+      const url = `/artifacts/`;
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -300,7 +300,7 @@ const useArtifacts = (searchValue, tagList) => {
     setArtifacts(prev => prev.filter(item => item.id !== artifactId));
 
     try {
-      const url = `/api/artifacts/${artifactId}`;
+      const url = `/artifacts/${artifactId}`;
       await vaultRequest({
         method: vaultRequests.DELETE,
         path: url,
@@ -334,7 +334,7 @@ const useArtifacts = (searchValue, tagList) => {
     );
 
     try {
-      const url = `/api/artifacts/text/${artifactId}`;
+      const url = `/artifacts/text/${artifactId}`;
 
       const res = await vaultRequest({
         method: vaultRequests.PATCH,
@@ -344,6 +344,7 @@ const useArtifacts = (searchValue, tagList) => {
           "textContent": content,
         },
       });
+
       const json = res.data;
 
       setArtifacts(prevArtifacts =>
@@ -372,12 +373,35 @@ const useArtifacts = (searchValue, tagList) => {
     }
   };
 
+  const downloadFileArtifact = async (artifactFilename) => {
+
+    const url = '/sas-generate/download'
+    const res = await vaultRequest({
+      method: vaultRequests.POST,
+      path: url,
+      payload: {
+        "filename": artifactFilename,
+      },
+    });
+    const sasToken = res.data.data;
+    const imageRes = await fetch(sasToken.url_sas);
+    const blob = await imageRes.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = blobUrl;
+    link.download = artifactFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
 
   useEffect(() => {
     if (error) setError(null);
   }, [error]);
 
-  return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact, hasMoreArtifacts };
+  return { artifacts, isLoading, error, addArtifact, removeArtifact, onRemoveTag, onAddTag, fetchArtifactsData, editArtifact, hasMoreArtifacts, downloadFileArtifact };
 };
 export default useArtifacts;
 

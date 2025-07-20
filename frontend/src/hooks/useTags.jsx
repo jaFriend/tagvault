@@ -9,7 +9,7 @@ const useTags = () => {
   const fetchTagsData = useCallback(async () => {
 
     try {
-      const url = `/api/tags/`;
+      const url = `/tags/`;
       const res = await vaultRequest({
         method: vaultRequests.GET,
         path: url,
@@ -56,7 +56,7 @@ const useTags = () => {
     setTags(prevTags => insertTagSorted(prevTags, tempTag));
 
     try {
-      const url = "/api/tags/";
+      const url = "/tags/";
       const res = await vaultRequest({
         method: vaultRequests.POST,
         path: url,
@@ -82,7 +82,7 @@ const useTags = () => {
     setTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
 
     try {
-      const url = "/api/tags/" + tagId;
+      const url = "/tags/" + tagId;
       await vaultRequest({
         method: vaultRequests.DELETE,
         path: url,
