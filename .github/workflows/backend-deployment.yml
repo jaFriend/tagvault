@@ -11,11 +11,8 @@ on:
       - main
     paths: ['backend/**']
 env:
-  IMAGE_NAME: jafriend/tagvault-backend
-  IMAGE_TAG: latest
   REMOTE_HOST: api.tagvault.cc
   REMOTE_USER: tagvault
-  CONTAINER_NAME: tagvault-backend
 
 jobs:
   build_and_deploy_job:
@@ -38,7 +35,7 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
+          tags: jafriend/tagvault-backend:latest
       - name: Deploy to Remote Server via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -46,12 +43,12 @@ jobs:
           username: ${{ env.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull $IMAGE_NAME:$IMAGE_TAG
-            docker stop $CONTAINER_NAME || true
-            docker rm $CONTAINER_NAME || true
+            docker pull jafriend/tagvault-backend:latest
+            docker stop tagvault-backend || true
+            docker rm tagvault-backend || true
             docker run -d \
-              --name $CONTAINER_NAME \
+              --name tagvault-backend \
               --env-file .env \
               -v /home/tagvault/clerk_key.pem:/app/config/clerk_key.pem \
               -p 5050:5050 \
-              $IMAGE_NAME:$IMAGE_TAG
+              jafriend/tagvault-backend:latest
