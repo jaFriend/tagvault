@@ -103,7 +103,7 @@ const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEd
     >
       <List
         height={ITEM_HEIGHT * 2 + GAP}
-        style={{ borderRadius: `8px`, overflowX: 'hidden', overflowY: 'hidden' }}
+        style={{ borderRadius: `8px`, overflowX: 'hidden', overflowY: 'scroll' }}
         width={380 * itemsPerRow + (itemsPerRow - 1) * 15}
         itemCount={totalRows}
         itemSize={ROW_HEIGHT}
