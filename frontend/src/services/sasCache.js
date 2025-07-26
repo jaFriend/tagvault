@@ -5,7 +5,6 @@ const sasCache = {
   get(filename) {
     const cache = loadCache();
     const item = cache[filename];
-    console.log(item);
     if (!item) return null;
     const now = Date.now();
 

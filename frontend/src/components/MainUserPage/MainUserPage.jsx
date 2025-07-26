@@ -25,7 +25,6 @@ const MainUserPage = () => {
   } = useTags();
   const {
     artifacts,
-    isLoading: isLoadingArtifacts,
     error: artifactError,
     addArtifact,
     removeArtifact,
@@ -85,7 +84,6 @@ const MainUserPage = () => {
 
   return (
     <div className={styles.mainContainer}>
-      <h1 className={styles.boldText}>Welcome to your TagVault Dashboard!</h1>
       <SearchInput onSearchSubmit={searchSubmit} />
       <button
         onClick={handleFileModalOpen}
@@ -102,8 +100,7 @@ const MainUserPage = () => {
 
       <div className={styles.contentContainer}>
         <h2 className={styles.boldText}>Your Tags</h2>
-        {isLoadingTags && <p>Loading tags...</p>}
-        {!isLoadingTags && tags.length === 0 && (
+        {tags.length === 0 && (
           <p>No tags created yet. Click "Upload New Tag" to add some!</p>
         )}
         <div className={styles.tagGrid}>
@@ -119,11 +116,10 @@ const MainUserPage = () => {
           ))}
         </div>
         <h2 className={styles.boldText}>Your Artifacts</h2>
-        {isLoadingArtifacts && <p>Loading artifacts...</p>}
-        {!isLoadingArtifacts && artifacts.length === 0 && (
+        {artifacts.length === 0 && selectedTagIds.length === 0 && searchValue === "" && (
           <p>You haven't uploaded any text artifacts yet. Click "Upload New Artifact" to add some!</p>
         )}
-        {!isLoadingArtifacts && !artifactError && artifacts.length > 0 && (
+        {(searchValue !== "" || selectedTagIds.length > 0 || (searchValue === "" && selectedTagIds.length === 0)) && (artifacts.length > 0 || searchValue !== "" || selectedTagIds.length > 0) && (
           <div className={styles.artifactGrid}>
             <ArtifactList
               artifacts={artifacts}

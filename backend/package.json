@@ -14,6 +14,7 @@
   "dependencies": {
     "@azure/identity": "^4.10.2",
     "@azure/storage-blob": "^12.27.0",
+    "@clerk/express": "^1.7.10",
     "@prisma/client": "^6.8.2",
     "cookies": "^0.9.1",
     "cors": "^2.8.5",

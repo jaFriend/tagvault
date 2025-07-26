@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import styles from './ArtifactTextItem.module.css';
 import TagItem from '../TagItem';
 
@@ -10,8 +10,6 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const [editedContent, setEditedContent] = useState(content);
-
-
 
   useEffect(() => {
     if (tagsScrollContainerRef.current && showAddTagInput) {
@@ -155,8 +153,6 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
               <p className={styles.scrollIndicator}>---</p>
             )}
           </div>
-
-
         </>
       )}
 
@@ -199,4 +195,4 @@ const ArtifactTextItem = ({ artifactId, title, content, onRemove, tags, onAddTag
   );
 }
 
-export default ArtifactTextItem;
+export default memo(ArtifactTextItem);

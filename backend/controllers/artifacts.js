@@ -70,7 +70,6 @@ async function getArtifacts(userId, searchValue, tags, limit, cursor) {
   return prisma.artifact.findMany(queryConfig);
 }
 
-
 async function deleteArtifact(userId, artifactId) {
   const artifactWithTags = await prisma.artifact.findUnique({
     where: { id: artifactId },
@@ -81,7 +80,6 @@ async function deleteArtifact(userId, artifactId) {
     }
   });
 
-
   const tagIds = artifactWithTags.tags.map(tag => tag.id);
   const artifact = await prisma.artifact.delete({
     where: {
@@ -91,7 +89,6 @@ async function deleteArtifact(userId, artifactId) {
   });
 
   if (artifact.fileType === "FILE") deleteFile(userId, artifact.fileName);
-
   for (const tagId of tagIds) {
     const tagWithArtifacts = await prisma.tag.findUnique({
       where: { id: tagId },
@@ -150,7 +147,6 @@ async function addTagToArtifact(userId, artifactId, tagName) {
 
 }
 
-
 async function removeTagFromArtifact(userId, artifactId, tagId) {
   const updatedArtifact = await prisma.artifact.update({
     where: {
@@ -189,7 +185,6 @@ async function removeTagFromArtifact(userId, artifactId, tagId) {
   }
 
   return updatedArtifact;
-
 }
 
 async function updateArtifact(userId, artifactId, title, textContent) {
@@ -209,9 +204,6 @@ async function updateArtifact(userId, artifactId, title, textContent) {
     }
   });
 }
-
-
-
 
 export {
   createArtifact,

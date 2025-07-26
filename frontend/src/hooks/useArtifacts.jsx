@@ -53,11 +53,11 @@ const useArtifacts = (searchValue, tagList) => {
       const fetchedArtifacts = json.data.artifacts || [];
       nextCursorRef.current = json.data.nextCursor;
       setHasMoreArtifacts(json.data.hasMoreArtifacts);
-      if (isNewSearch) setArtifacts([]);
-      setArtifacts(prev => [
-        ...prev,
-        ...fetchedArtifacts.map(a => a.fileType === "TEXT" ? formatTextArtifact(a) : formatFileArtifact(a))
-      ]);
+      if (isNewSearch) {
+        setArtifacts(fetchedArtifacts.map(a => a.fileType === "TEXT" ? formatTextArtifact(a) : formatFileArtifact(a)));
+      } else {
+        setArtifacts(prev => [...prev, ...fetchedArtifacts.map(a => a.fileType === "TEXT" ? formatTextArtifact(a) : formatFileArtifact(a))]);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -79,7 +79,7 @@ const useArtifacts = (searchValue, tagList) => {
 
   }, [fetchArtifactsData, initialFetch, searchValue]);
 
-  const onRemoveTag = async (artifactId, tagId) => {
+  const onRemoveTag = useCallback(async (artifactId, tagId) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const originalArtifact = index !== -1 ? artifacts[index] : undefined;
 
@@ -119,9 +119,9 @@ const useArtifacts = (searchValue, tagList) => {
       });
       setError(err.message);
     }
-  };
+  }, [artifacts]);
 
-  const onAddTag = async (artifactId, tagName) => {
+  const onAddTag = useCallback(async (artifactId, tagName) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const originalArtifact = index !== -1 ? artifacts[index] : undefined;
     const tempTag = {
@@ -165,17 +165,11 @@ const useArtifacts = (searchValue, tagList) => {
       });
       setError(err.message);
     }
-  }; const addArtifact = async ({ type, data }) => {
+  }, [artifacts]);
 
-    if (type === 'TEXT') {
-      addTextArtifact(data);
-    } else if (type === 'FILE') {
-      addFileArtifact(data);
-    }
 
-  };
 
-  const addTextArtifact = async ({ title, text }) => {
+  const addTextArtifact = useCallback(async ({ title, text }) => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`
     const tempArtifact = {
       id: tempId,
@@ -212,9 +206,9 @@ const useArtifacts = (searchValue, tagList) => {
       setArtifacts(prevItems => prevItems.slice(1))
       setError(err.message);
     }
-  }
+  }, []);
 
-  const addFileArtifact = async ({ title, file }) => {
+  const addFileArtifact = useCallback(async ({ title, file }) => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const tempArtifact = {
       id: tempId,
@@ -270,7 +264,6 @@ const useArtifacts = (searchValue, tagList) => {
 
 
       const json = res.data;
-      console.log(json);
 
       setArtifacts(prevItems => [
         {
@@ -289,9 +282,19 @@ const useArtifacts = (searchValue, tagList) => {
       setArtifacts(prevItems => prevItems.slice(1));
       setError(err.message);
     }
-  };
+  }, []);
 
-  const removeArtifact = async (artifactId) => {
+  const addArtifact = useCallback(async ({ type, data }) => {
+
+    if (type === 'TEXT') {
+      addTextArtifact(data);
+    } else if (type === 'FILE') {
+      addFileArtifact(data);
+    }
+
+  }, [addTextArtifact, addFileArtifact]);
+
+  const removeArtifact = useCallback(async (artifactId) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const artifact = artifacts.find(item => item.id === artifactId);
     if (!artifact) {
@@ -316,8 +319,9 @@ const useArtifacts = (searchValue, tagList) => {
       if (hasMoreArtifacts) fetchArtifactsData({ limit: 1 });
     }
 
-  };
-  const editArtifact = async (artifactId, title, content) => {
+  }, [artifacts, fetchArtifactsData, hasMoreArtifacts]);
+
+  const editArtifact = useCallback(async (artifactId, title, content) => {
     const index = artifacts.findIndex(item => item.id === artifactId);
     const originalArtifact = index !== -1 ? artifacts[index] : undefined;
 
@@ -371,9 +375,9 @@ const useArtifacts = (searchValue, tagList) => {
       });
       setError(err.message);
     }
-  };
+  }, [artifacts]);
 
-  const downloadFileArtifact = async (artifactFilename) => {
+  const downloadFileArtifact = useCallback(async (artifactFilename) => {
 
     const url = '/sas-generate/download'
     const res = await vaultRequest({
@@ -394,7 +398,7 @@ const useArtifacts = (searchValue, tagList) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
+  }, []);
 
 
   useEffect(() => {

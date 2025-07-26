@@ -1,59 +1,36 @@
 import express, { Router } from 'express';
+import { verifyWebhook } from '@clerk/express/webhooks';
+import * as UserController from '../../controllers/users.js';
+
+const CLERK_WEBHOOK_SIGNING_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
 
 const router = Router();
-import * as UserController from '../../controllers/users.js'
-const CLERK_WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
 
-router.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
-  if (!CLERK_WEBHOOK_SECRET) {
-    return response.status(500).json({
-      status: "error",
-      message: "Webhook signature cannot be verified.",
-    });
-  }
-
-  const rawBody = request.body;
-  const signature = request.header('Clerk-Signature');
-  if (!signature) {
-    return res.status(400).json({ status: "error", message: "Missing Clerk-Signature header" });
-  }
-
-  const expectedSignature = crypto
-    .createHmac('sha256', CLERK_WEBHOOK_SECRET)
-    .update(rawBody)
-    .digest('hex');
-  const valid = crypto.timingSafeEqual(
-    Buffer.from(expectedSignature),
-    Buffer.from(signature)
-  );
-
-  if (!valid) {
-    return res.status(403).json({ status: "error", message: "Invalid signature" });
-  }
-  let event;
-
+  let evt;
   try {
-    event = JSON.parse(rawBody.toString('utf-8'));
+    evt = await verifyWebhook(req, { signingSecret: CLERK_WEBHOOK_SIGNING_SECRET });
   } catch (err) {
-    return res.status(400).json({ status: "error", message: "Invalid JSON payload" });
+    console.error('Webhook verification failed:', err.message);
+    return res.status(403).json({ status: 'error', message: 'Invalid webhook signature' });
   }
 
   try {
-    switch (event.type) {
+    switch (evt.type) {
       case 'user.created':
-        await UserController.createUser(event.data);
+        await UserController.createUser(evt.data);
         break;
       case 'user.deleted':
-        await UserController.deleteUser(event.data.id);
+        await UserController.deleteUser(evt.data.id);
         break;
       default:
-        console.log("Unhandled event type:", event.type);
+        console.log('Unhandled webhook event type:', evt.type);
     }
 
-    res.status(200).json({ status: "success" });
+    return res.status(200).json({ status: 'success' });
   } catch (err) {
-    console.error("Webhook processing error:", err);
-    res.status(500).json({ status: "error", message: err.message });
+    console.error('Webhook handling error:', err.message);
+    return res.status(500).json({ status: 'error', message: err.message });
   }
 });
 

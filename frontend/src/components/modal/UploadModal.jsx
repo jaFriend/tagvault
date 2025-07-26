@@ -28,7 +28,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }) => {
       alert('Please select a file to upload.');
       return;
     }
-    console.log(selectedFile)
     onUpload({
       type: 'FILE',
       data: {

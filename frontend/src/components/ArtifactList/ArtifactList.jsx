@@ -1,10 +1,8 @@
 import styles from './ArtifactList.module.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import ArtifactTextItem from '../ArtifactTextItem';
 import ArtifactFileItem from '../ArtifactFileItem';
-
-
 
 const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEditArtifact, fetchArtifactsData, hasMoreItems, downloadFileArtifact }) => {
   const [itemsPerRow, setItemsPerRow] = useState(3);
@@ -26,10 +24,11 @@ const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEd
     window.addEventListener('resize', updateItemsPerRow);
     return () => window.removeEventListener('resize', updateItemsPerRow);
   }, []);
-  const totalRows = Math.ceil(artifacts.length / itemsPerRow);
+  const totalRows = useMemo(() => Math.ceil(artifacts.length / itemsPerRow), [artifacts.length, itemsPerRow]);
   const ITEM_HEIGHT = 550;
   const GAP = 15;
   const ROW_HEIGHT = ITEM_HEIGHT + GAP;
+
 
   const handleItemsRendered = ({ visibleStopIndex }) => {
     if (visibleStopIndex >= totalRows - 2 && !isFetchingData && hasMoreItems) {
@@ -104,7 +103,7 @@ const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEd
     >
       <List
         height={ITEM_HEIGHT * 2 + GAP}
-        style={{ borderRadius: `8px` }}
+        style={{ borderRadius: `8px`, overflowX: 'hidden', overflowY: 'hidden' }}
         width={380 * itemsPerRow + (itemsPerRow - 1) * 15}
         itemCount={totalRows}
         itemSize={ROW_HEIGHT}
@@ -120,5 +119,5 @@ const ArtifactList = ({ artifacts, onRemoveArtifact, onAddTag, onRemoveTag, onEd
   );
 };
 
-export default ArtifactList;
+export default memo(ArtifactList);
 
