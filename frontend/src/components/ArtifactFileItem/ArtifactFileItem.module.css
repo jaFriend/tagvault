@@ -91,6 +91,7 @@
   flex-grow: 1;
   white-space: nowrap;
   overflow-x: auto;
+  scrollbar-width: none;
   min-width: 0;
   white-space: nowrap;
 }
